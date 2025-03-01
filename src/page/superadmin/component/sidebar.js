@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaHome, FaUser, FaMoneyBill, FaCoins, FaBirthdayCake, FaBuilding, FaQuestionCircle, FaWallet, FaChevronRight, FaLaptop, FaFileContract, FaHandshake, FaRegChartBar, FaStore, FaComments, FaPlusSquare, FaListAlt, FaDollarSign, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { FaHome, FaUser, FaMoneyBill, FaCoins, FaBirthdayCake, FaBuilding, FaQuestionCircle, FaWallet, FaChevronRight, FaLaptop, FaFileContract, FaHandshake, FaRegChartBar, FaStore, FaComments, FaPlusSquare, FaListAlt, FaDollarSign, FaCheckCircle, FaTimesCircle, FaSpinner, FaUserShield, FaUserCog } from 'react-icons/fa';
 import { RiAccountPinBoxFill } from "react-icons/ri";
 import { MdSupervisorAccount } from "react-icons/md";
-import logo from "../../../public/BR (2).jpg"
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
+import logo from "../../../public/BR (2).jpg";
+import { MdGppGood } from "react-icons/md";
 
+// Updated AdminSidebar component with Admin Management added
 const AdminSidebar = ({ bgColor, textColor }) => {
   const location = useLocation();
   const [openMenus, setOpenMenus] = useState({});
@@ -20,87 +25,86 @@ const AdminSidebar = ({ bgColor, textColor }) => {
     }));
   };
 
-
   const menuItems = [
     {
       name: 'Dashboard',
-      path: '/admin-dashboard',
+      path: '/superadmin-dashboard',
       icon: <FaLaptop className="h-5 w-5 mr-3" />,
       exact: true
     },
     {
       name: 'Commissions',
-      path: '/admin-dashboard/commissions',
+      path: '/superadmin-dashboard/commissions',
       icon: <FaCoins className="h-5 w-5 mr-3" />
     },
-    // {
-    //   name: 'Commissions',
-    //   icon: <FaDollarSign className="h-5 w-5 mr-3" />,
-    //   subItems: [
-    //     { name: 'Commission Activation', path: '/admin-dashboard/commission-activation' },
-    //     { name: "Commissions", path: '/admin-dashboard/commissions' }
-    //   ]
-    // },
- 
     {
       name: 'Funding',
-      path: '/admin-dashboard/funding',
+      path: '/superadmin-dashboard/funding',
       icon: <FaCoins className="h-5 w-5 mr-3" />
     },
     {
       name: 'View Realtors',
-      path: '/admin-dashboard/view-realtors',
+      path: '/superadmin-dashboard/view-realtors',
       icon: <RiAccountPinBoxFill className="h-5 w-5 mr-3" />
     },
     {
       name: 'View Clients',
-      path: '/admin-dashboard/view-client',
+      path: '/superadmin-dashboard/view-client',
       icon: <MdSupervisorAccount className="h-5 w-5 mr-3" />
     },
-   
+    {
+      name: 'Admin Management',
+      path: '/superadmin-dashboard/admin-management',
+      icon: <FaUserShield className="h-5 w-5 mr-3" />
+    },
     {
       name: 'Birthday',
       icon: <FaBirthdayCake className="h-5 w-5 mr-3" />,
       subItems: [
-        { name: 'Birthday Message', path: '/admin-dashboard/birthday-message' },
-        { name: "Today's Birthdays", path: '/admin-dashboard/todays-birthdays' }
+        { name: 'Birthday Message', path: '/superadmin-dashboard/birthday-message' },
+        { name: "Today's Birthdays", path: '/superadmin-dashboard/todays-birthdays' }
       ]
     },
     {
       name: 'Properties Sales',
       icon: <FaStore className="h-5 w-5 mr-3" />,
       subItems: [
-        { name: 'Pending Sales', path: '/admin-dashboard/pending-sales' },
-        { name: 'Approved Sales', path: '/admin-dashboard/approved-sales' },
-        { name: 'Unbalanced Sales', path: '/admin-dashboard/unbalanced-sales' },
-        { name: 'Rejected Sales', path: '/admin-dashboard/rejected-sales' }
+        { name: 'Pending Sales', path: '/superadmin-dashboard/pending-sales' },
+        { name: 'Approved Sales', path: '/superadmin-dashboard/approved-sales' },
+        { name: 'Unbalanced Sales', path: '/superadmin-dashboard/unbalanced-sales' },
+        { name: 'Rejected Sales', path: '/superadmin-dashboard/rejected-sales' }
       ]
     },
     {
       name: 'Withdrawal',
-      path: '/admin-dashboard/withdrawal',
+      path: '/superadmin-dashboard/withdrawal',
       icon: <FaWallet className="h-5 w-5 mr-3" />
     },
     {
       name: 'FAQ',
       icon: <FaQuestionCircle className="h-5 w-5 mr-3" />,
       subItems: [
-        { name: 'Add FAQ', path: '/admin-dashboard/add-faq' },
-        { name: 'View FAQ', path: '/admin-dashboard/view-faq' }
+        { name: 'Add FAQ', path: '/superadmin-dashboard/add-faq' },
+        { name: 'View FAQ', path: '/superadmin-dashboard/view-faq' }
       ]
     },
     {
       name: 'Properties',
       icon: <FaBuilding className="h-5 w-5 mr-3" />,
       subItems: [
-        { name: 'Add Property', path: '/admin-dashboard/add-property' },
-        { name: 'View Properties', path: '/admin-dashboard/view-properties' }
+        { name: 'Add Property', path: '/superadmin-dashboard/add-property' },
+        { name: 'View Properties', path: '/superadmin-dashboard/view-properties' }
       ]
     },
     {
       name: 'Messages',
-      path: '/admin-dashboard/messages',
+      path: '/superadmin-dashboard/messages',
       icon: <FaComments className="h-5 w-5 mr-3" />
+    },
+    {
+      name: 'Testimonials',
+      path: '/superadmin-dashboard/testimonials',
+      icon: <MdGppGood className="h-5 w-5 mr-3" />
     }
   ];
 
@@ -184,5 +188,6 @@ const AdminSidebar = ({ bgColor, textColor }) => {
     </div>
   );
 };
+
 
 export default AdminSidebar;

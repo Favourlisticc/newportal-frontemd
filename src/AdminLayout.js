@@ -1,6 +1,6 @@
 import React from 'react';
-import AdminDashboard from './page/admin/dashboard/page/dasboard';
-import AdminSidebar from './page/admin/component/sidebar';
+import AdminDashboard from './page/superadmin/dashboard/page/dasboard';
+import AdminSidebar from './page/superadmin/component/sidebar';
 import { Outlet } from "react-router-dom"; // Import Outlet
 
 const AdminLayout = () => {

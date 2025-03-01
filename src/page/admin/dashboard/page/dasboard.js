@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
-    totalConsultants: 0,
+    totalRealtors: 0,
     totalWithdrawn: 0,
     pendingWithdrawals: 0
   });
@@ -45,8 +45,8 @@ const AdminDashboard = () => {
             </div>
           ) : (
             <p className="text-lg md:text-2xl font-bold text-white">
-              {title.includes('CONSULTANTS') 
-                ? value.toLocaleString() // Number format for consultants
+              {title.includes('REALTORS') 
+                ? value.toLocaleString() // Number format for realtors
                 : value.toLocaleString('en-NG', { style: 'currency', currency: 'NGN' })}
             </p>
           )}
@@ -70,8 +70,8 @@ const AdminDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
         <StatCard
           icon={<FaUsers />}
-          title="REGISTERED CONSULTANTS"
-          value={stats.totalConsultants}
+          title="REGISTERED REALTORS"
+          value={stats.totalRealtors}
           color="bg-[#E5B30F]/10"
         />
         
