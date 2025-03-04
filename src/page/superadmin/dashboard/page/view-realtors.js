@@ -38,7 +38,7 @@ const RealtorsList = () => {
       const adjustedStartDate = adjustDate(startDate, false);
       const adjustedEndDate = adjustDate(endDate, true);
   
-      const response = await axios.get(`http://localhost:3005/admin/viewrealtors`, {
+      const response = await axios.get(`https://newportal-backend.onrender.com/admin/viewrealtors`, {
         params: {
           search,
           sortOrder,
@@ -61,7 +61,7 @@ const RealtorsList = () => {
   const handleDelete = async (id) => {
     try {
       setActionLoading(id);
-      await axios.delete(`http://localhost:3005/admin/delete/${id}`);
+      await axios.delete(`https://newportal-backend.onrender.com/admin/delete/${id}`);
       toast.success('Realtors deleted successfully');
       fetchRealtors();
     } catch (error) {
@@ -74,7 +74,7 @@ const RealtorsList = () => {
   const handleView = async (id) => {
     try {
       setActionLoading(id);
-      const response = await axios.get(`http://localhost:3005/admin/viewrealtors/${id}`);
+      const response = await axios.get(`https://newportal-backend.onrender.com/admin/viewrealtors/${id}`);
       setSelectedRealtors(response.data);
       setIsViewModalOpen(true);
     } catch (error) {
@@ -87,7 +87,7 @@ const RealtorsList = () => {
   const handleEdit = async (id) => {
     try {
       setActionLoading(id);
-      const response = await axios.get(`http://localhost:3005/admin/viewrealtors/${id}`);
+      const response = await axios.get(`https://newportal-backend.onrender.com/admin/viewrealtors/${id}`);
       setEditForm(response.data);
       setIsEditModalOpen(true);
     } catch (error) {
@@ -100,7 +100,7 @@ const RealtorsList = () => {
   const handleUpdate = async () => {
     try {
       setActionLoading(editForm._id);
-      await axios.put(`http://localhost:3005/admin/editrealtors/${editForm._id}`, editForm);
+      await axios.put(`https://newportal-backend.onrender.com/admin/editrealtors/${editForm._id}`, editForm);
       toast.success('Realtors updated successfully');
       setIsEditModalOpen(false);
       fetchRealtors();

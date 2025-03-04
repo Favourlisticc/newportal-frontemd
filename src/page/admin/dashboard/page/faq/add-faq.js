@@ -16,7 +16,7 @@ const AddFAQ = () => {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const { data } = await axios.get("http://localhost:3005/admin/faq/properties");
+        const { data } = await axios.get("https://newportal-backend.onrender.com/admin/faq/properties");
         setProperties(data);
       } catch (err) {
         toast.error("Failed to fetch properties");
@@ -31,7 +31,7 @@ const AddFAQ = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data } = await axios.post("http://localhost:3005/admin/faq", {
+      const { data } = await axios.post("https://newportal-backend.onrender.com/admin/faq", {
         property,
         question,
         answer,

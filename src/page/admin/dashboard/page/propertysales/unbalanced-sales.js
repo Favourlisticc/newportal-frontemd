@@ -18,7 +18,7 @@ const IncompletePurchasesPage = () => {
   useEffect(() => {
     const fetchPurchases = async () => {
       try {
-        const response = await axios.get('http://localhost:3005/admin/purchases/incomplete');
+        const response = await axios.get('https://newportal-backend.onrender.com/admin/purchases/incomplete');
         setPurchases(response.data);
       } catch (error) {
         console.error('Error fetching purchases:', error);
@@ -39,7 +39,7 @@ const IncompletePurchasesPage = () => {
   // Handle adding a reminder
   const handleAddReminder = async (purchaseId, amountRemaining, nextPaymentDate,) => {
     try {
-      await axios.post('http://localhost:3005/admin/reminders', {
+      await axios.post('https://newportal-backend.onrender.com/admin/reminders', {
         purchaseId,
         propertyName: selectedPurchase.propertyName,
         propertyActualPrice: selectedPurchase.propertyActualPrice,
@@ -58,7 +58,7 @@ const IncompletePurchasesPage = () => {
   const fetchReminders = async (purchaseId) => {
     setReminderLoading(true);
     try {
-      const response = await axios.get(`http://localhost:3005/admin/reminders/${purchaseId}`);
+      const response = await axios.get(`https://newportal-backend.onrender.com/admin/reminders/${purchaseId}`);
       setReminders(response.data?.reminders || []);
     } catch (error) {
       console.error('Error fetching reminders:', error);

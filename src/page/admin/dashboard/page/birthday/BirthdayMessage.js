@@ -14,7 +14,7 @@ export default function BirthdayMessage() {
     const fetchMessage = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:3005/admin/birthday-message");
+        const response = await axios.get("https://newportal-backend.onrender.com/admin/birthday-message");
         setCurrentMessage(response.data);
         if (response.data) setMessage(response.data.message);
       } catch (error) {
@@ -33,7 +33,7 @@ export default function BirthdayMessage() {
 
     try {
       setLoading(true);
-      const response = await axios.post("http://localhost:3005/admin/birthday-message", { message });
+      const response = await axios.post("https://newportal-backend.onrender.com/admin/birthday-message", { message });
       setCurrentMessage(response.data);
       toast.success("Birthday message updated successfully! 🎉");
     } catch (error) {

@@ -84,6 +84,11 @@ import RegisterForm from "./page/clients/auth/register.js";
 import ClientProtectedRoute from "./page/clients/auth/protected.js";
 import ClientPurchaseHistory from "./page/clients/dashboard/PurchaseRecord.js";
 import RemRemindersTable from "./page/clients/dashboard/unsettled-sales.js"
+import ClientSupport from "./page/clients/dashboard/support.js"
+
+import ClientFAq from "./page/clients/dashboard/faq.js";
+import ClientTestimonials from "./page/clients/dashboard/testimonials.js"
+import ClientMessageSupport from "./page/clients/dashboard/contact-support.js"
 
 function App() {
   return (
@@ -210,6 +215,13 @@ function App() {
           <Route path="purchasehistory" element={<ClientPurchaseHistory />} />
           <Route path="upload" element={<DataUploadPage />} />
           <Route path="unsettled-sales" element={<RemRemindersTable />} />
+
+          <Route path="support" element={<ClientSupport />} />
+          <Route path="faq" element={<ClientFAq />} />
+          <Route path="add-testimonials" element={<ClientTestimonials />} />
+          <Route path="upload" element={<DataUploadPage />} />
+          <Route path="contact-support" element={<ClientMessageSupport />} />
+          
         </Route>
       </Routes>
     </div>

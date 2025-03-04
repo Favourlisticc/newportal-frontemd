@@ -21,7 +21,7 @@ const ClientTable = () => {
   const fetchClients = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3005/admin/clients', {
+      const response = await axios.get('https://newportal-backend.onrender.com/admin/clients', {
         params: { search: searchTerm, sortBy, sortOrder }
       });
       setClients(response.data);
@@ -35,7 +35,7 @@ const ClientTable = () => {
   const handleView = async (id) => {
     try {
       setModalLoading(true);
-      const response = await axios.get(`http://localhost:3005/admin/clients/${id}`);
+      const response = await axios.get(`https://newportal-backend.onrender.com/admin/clients/${id}`);
       setSelectedClient(response.data);
     } catch (error) {
       toast.error('Failed to fetch client details');
@@ -51,7 +51,7 @@ const ClientTable = () => {
   const handleUpdate = async () => {
     try {
       setModalLoading(true);
-      const response = await axios.put(`http://localhost:3005/admin/clients/${editClient._id}`, editClient);
+      const response = await axios.put(`https://newportal-backend.onrender.com/admin/clients/${editClient._id}`, editClient);
       setClients(clients.map(c => c._id === editClient._id ? response.data : c));
       toast.success('Client updated successfully');
       setEditClient(null);
@@ -65,7 +65,7 @@ const ClientTable = () => {
   const handleDelete = async (id) => {
     try {
       setModalLoading(true);
-      await axios.delete(`http://localhost:3005/admin/clients/${id}`);
+      await axios.delete(`https://newportal-backend.onrender.com/admin/clients/${id}`);
       setClients(clients.filter(c => c._id !== id));
       toast.success('Client deleted successfully');
     } catch (error) {

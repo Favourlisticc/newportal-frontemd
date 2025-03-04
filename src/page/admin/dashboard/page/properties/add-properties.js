@@ -92,7 +92,7 @@ const AddPropertyForm = () => {
       );
 
       // Submit property data
-      await axios.post("http://localhost:3005/admin/properties", {
+      await axios.post("https://newportal-backend.onrender.com/admin/properties", {
         ...formData,
         featuredImage: featuredImageUrl,
         galleryImages: galleryUrls,

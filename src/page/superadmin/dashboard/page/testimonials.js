@@ -61,8 +61,8 @@ const TestimonialsManagement = () => {
     setLoading(true);
     try {
       const [pendingRes, acceptedRes] = await Promise.all([
-        axios.get('http://localhost:3005/admin/testimonial/pending'),
-        axios.get('http://localhost:3005/admin/testimonial/accepted')
+        axios.get('https://newportal-backend.onrender.com/admin/testimonial/pending'),
+        axios.get('https://newportal-backend.onrender.com/admin/testimonial/accepted')
       ]);
       
       setPendingTestimonials(pendingRes.data);
@@ -78,7 +78,7 @@ const TestimonialsManagement = () => {
   const handleAccept = async (testimonial) => {
     setActionInProgress(testimonial._id);
     try {
-      await axios.post('http://localhost:3005/admin/testimonial/accept', { testimonialId: testimonial._id });
+      await axios.post('https://newportal-backend.onrender.com/admin/testimonial/accept', { testimonialId: testimonial._id });
       toast.success('Testimonial accepted successfully');
       fetchTestimonials();
     } catch (error) {
@@ -92,7 +92,7 @@ const TestimonialsManagement = () => {
   const handleReject = async (testimonialId) => {
     setActionInProgress(testimonialId);
     try {
-      await axios.delete(`http://localhost:3005/admin/testimonial/pending/${testimonialId}`);
+      await axios.delete(`https://newportal-backend.onrender.com/admin/testimonial/pending/${testimonialId}`);
       toast.success('Testimonial rejected successfully');
       setPendingTestimonials(prevTestimonials => 
         prevTestimonials.filter(t => t._id !== testimonialId)
@@ -108,7 +108,7 @@ const TestimonialsManagement = () => {
   const handleDelete = async (testimonialId) => {
     setActionInProgress(testimonialId);
     try {
-      await axios.delete(`http://localhost:3005/admin/testimonial/accepted/${testimonialId}`);
+      await axios.delete(`https://newportal-backend.onrender.com/admin/testimonial/accepted/${testimonialId}`);
       toast.success('Testimonial deleted successfully');
       setAcceptedTestimonials(prevTestimonials => 
         prevTestimonials.filter(t => t._id !== testimonialId)

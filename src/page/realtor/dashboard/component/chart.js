@@ -11,7 +11,7 @@ const ReferralChart = ({ username }) => {
     useEffect(() => {
         const fetchChartData = async () => {
             try {
-                const response = await fetch(`http://localhost:3005/realtor/referrals/${username}`);
+                const response = await fetch(`https://newportal-backend.onrender.com/realtor/referrals/${username}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }

@@ -1,22 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { FaUsers, FaStar, FaClock, FaFileContract } from 'react-icons/fa';
 import axios from 'axios';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
-    totalRealtors: 0,
+    totalRealtor: 0,
     totalWithdrawn: 0,
-    pendingWithdrawals: 0
+    pendingWithdrawals: 0,
+    totalPropertiesBought: 0,
+    totalAmount: 0,
+    totalClients: 0, // Assuming you have this stat
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [earnings, setEarnings] = useState([]);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [statsRes] = await Promise.all([
-          axios.get('http://localhost:3005/admin/dashboard-stats'),
+          axios.get('https://newportal-backend.onrender.com/admin/dashboard-stats'),
         ]);
         setStats(statsRes.data);
       } catch (error) {
@@ -30,30 +33,29 @@ const AdminDashboard = () => {
   }, []);
 
   const StatCard = ({ icon, title, value, color }) => {
-    // Ensure value is a valid number
     const formattedValue = typeof value === 'number' 
-      ? title.includes('REALTORS') 
-        ? value.toLocaleString() // Number format for realtors
-        : value.toLocaleString('en-NG', { style: 'currency', currency: 'NGN' })
+      ? title.includes('REALTORS') || title.includes('PROPERTIES') 
+        ? value.toLocaleString() // Number format for realtors and properties
+        : value.toLocaleString('en-NG', { style: 'currency', currency: 'NGN' }) // Currency format for amounts
       : 'N/A'; // Fallback for invalid values
 
     return (
-      <div className="bg-[#002657] shadow-lg rounded-xl p-4 md:p-6 transition-all hover:scale-105 min-h-[120px]">
+      <div className={`${color} shadow-lg rounded-xl p-4 md:p-6 transition-all hover:scale-105 min-h-[120px] text-white`}>
         <div className="flex items-center space-x-3 md:space-x-4">
-          <div className={`p-2 md:p-3 rounded-full ${color}`}>
-            {React.cloneElement(icon, { className: 'text-xl md:text-2xl text-[#E5B30F]' })}
+          <div className="p-2 md:p-3 rounded-full bg-white/10">
+            {React.cloneElement(icon, { className: 'text-xl md:text-2xl' })}
           </div>
           <div className="flex-1">
-            <p className="text-xs md:text-sm text-gray-300 mb-1">{title}</p>
+            <p className="text-xs md:text-sm text-gray-200 mb-1">{title}</p>
             {isLoading ? (
               <div className="h-6 flex items-center">
-                <svg className="animate-spin h-4 w-4 md:h-5 md:w-5 text-[#E5B30F]" viewBox="0 0 24 24">
+                <svg className="animate-spin h-4 w-4 md:h-5 md:w-5 text-white" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                 </svg>
               </div>
             ) : (
-              <p className="text-lg md:text-2xl font-bold text-white">
+              <p className="text-lg md:text-2xl font-bold">
                 {formattedValue}
               </p>
             )}
@@ -63,36 +65,76 @@ const AdminDashboard = () => {
     );
   };
 
+  const ChartComponent = ({ stats }) => {
+    const data = [
+      { name: 'Realtors', value: stats.totalRealtor },
+      { name: 'Clients', value: stats.totalClients },
+      { name: 'Properties Sold', value: stats.totalPropertiesBought },
+      { name: 'Total Amount', value: stats.totalAmount },
+      { name: 'Total Withdrawn', value: stats.totalWithdrawn },
+      { name: 'Pending Withdrawals', value: stats.pendingWithdrawals },
+    ];
+
+    return (
+      <ResponsiveContainer width="100%" height={400}>
+        <BarChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="value" fill="#8884d8" />
+        </BarChart>
+      </ResponsiveContainer>
+    );
+  };
+
   return (
     <div className="p-4 md:p-6 bg-gray-100 min-h-screen">
-      {/* Dashboard Header */}
-
       {/* Dashboard Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
         <StatCard
           icon={<FaUsers />}
           title="REGISTERED REALTORS"
-          value={stats.totalRealtors || 0} // Default to 0 if undefined
-          color="bg-[#E5B30F]/10"
+          value={stats.totalRealtor || 0}
+          color="bg-gradient-to-r from-blue-500 to-blue-600"
         />
-        
         <StatCard
           icon={<FaStar />}
           title="TOTAL WITHDRAWN"
-          value={stats.totalWithdrawn || 0} // Default to 0 if undefined
-          color="bg-[#E5B30F]/10"
+          value={stats.totalWithdrawn || 0}
+          color="bg-gradient-to-r from-green-500 to-green-600"
         />
-        
         <StatCard
-          icon={<FaClock />} 
+          icon={<FaClock />}
           title="PENDING WITHDRAWALS"
-          value={stats.pendingWithdrawals || 0} // Default to 0 if undefined
-          color="bg-[#E5B30F]/10"
+          value={stats.pendingWithdrawals || 0}
+          color="bg-gradient-to-r from-yellow-500 to-yellow-600"
+        />
+        <StatCard
+          icon={<FaFileContract />}
+          title="TOTAL PROPERTIES BOUGHT"
+          value={stats.totalPropertiesBought || 0}
+          color="bg-gradient-to-r from-purple-500 to-purple-600"
+        />
+        <StatCard
+          icon={<FaFileContract />}
+          title="TOTAL AMOUNT"
+          value={stats.totalAmount || 0}
+          color="bg-gradient-to-r from-red-500 to-red-600"
         />
       </div>
 
+      {/* Chart Section */}
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden p-4 md:p-6">
+        <h3 className="text-base md:text-lg font-semibold text-[#002657] mb-4">
+          Dashboard Overview
+        </h3>
+        <ChartComponent stats={stats} />
+      </div>
+
       {/* Earnings Table */}
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden mt-6">
         <div className="p-4 md:p-6 bg-[#002657]">
           <h3 className="text-base md:text-lg font-semibold text-[#E5B30F]">
             <FaFileContract className="inline mr-2" />
@@ -111,10 +153,6 @@ const AdminDashboard = () => {
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
             </svg>
           </div>
-        ) : earnings.length === 0 ? (
-          <div className="p-4 md:p-6 text-center text-gray-500">
-            No earnings data available.
-          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -132,7 +170,8 @@ const AdminDashboard = () => {
               </thead>
               
               <tbody className="divide-y divide-gray-200">
-                {earnings.map((entry, index) => (
+                {/* Example static data */}
+                {[].map((entry, index) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-4 py-2 md:px-6 md:py-4 whitespace-nowrap">{index + 1}</td>
                     <td className="px-4 py-2 md:px-6 md:py-4 whitespace-nowrap">{entry.username}</td>

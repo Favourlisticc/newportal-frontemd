@@ -19,7 +19,7 @@ export default function FundingHistory() {
 
   const fetchFunds = async () => {
     try {
-      const response = await axios.get('http://localhost:3005/admin/funds');
+      const response = await axios.get('https://newportal-backend.onrender.com/admin/funds');
       setFunds(response.data);
       console.log(response.data)
 
@@ -34,7 +34,7 @@ export default function FundingHistory() {
   const handleStatusUpdate = async (id, newStatus, amount, _id) => {
     setProcessingId(id);
     try {
-      await axios.put(`http://localhost:3005/admin/funds/${id}`, { status: newStatus, amount, id });
+      await axios.put(`https://newportal-backend.onrender.com/admin/funds/${id}`, { status: newStatus, amount, id });
       toast.success(`Fund request ${newStatus}`);
       await fetchFunds();
     } catch (error) {
@@ -47,7 +47,7 @@ export default function FundingHistory() {
   const handleDelete = async (id) => {
     setProcessingId(id);
     try {
-      await axios.delete(`http://localhost:3005/admin/funds/${id}`);
+      await axios.delete(`https://newportal-backend.onrender.com/admin/funds/${id}`);
       toast.success('Fund request deleted');
       await fetchFunds();
     } catch (error) {

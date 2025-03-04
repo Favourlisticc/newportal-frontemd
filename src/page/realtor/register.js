@@ -111,7 +111,7 @@ const RegisterForm = () => {
 
   const requestOTP = async () => {
     try {
-      const response = await fetch("http://localhost:3005/auth/realtor/send-otp", {
+      const response = await fetch("https://newportal-backend.onrender.com/auth/realtor/send-otp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -137,7 +137,7 @@ const RegisterForm = () => {
 
   const verifyOTP = async (otp) => {
     try {
-      const response = await fetch("http://localhost:3005/auth/realtor/verify-otp", {
+      const response = await fetch("https://newportal-backend.onrender.com/auth/realtor/verify-otp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -163,7 +163,7 @@ const RegisterForm = () => {
 
   const completeRegistration = async () => {
     try {
-      const response = await fetch("http://localhost:3005/auth/realtor/register", {
+      const response = await fetch("https://newportal-backend.onrender.com/auth/realtor/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -374,7 +374,7 @@ const RegisterForm = () => {
     setLoading(true);
     try {
       // First check if the email and username are available
-      const checkResponse = await fetch("http://localhost:3005/auth/realtor/check-availability", {
+      const checkResponse = await fetch("https://newportal-backend.onrender.com/auth/realtor/check-availability", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -92,7 +92,7 @@ const AddPropertyForm = () => {
       );
 
       // Submit property data
-      await axios.post("http://localhost:3005/admin/properties", {
+      await axios.post("https://newportal-backend.onrender.com/admin/properties", {
         ...formData,
         featuredImage: featuredImageUrl,
         galleryImages: galleryUrls,
@@ -224,7 +224,7 @@ const AddPropertyForm = () => {
 
             <div>
               <label className="block text-sm font-medium text-[#002657] mb-2 flex items-center gap-2">
-                <DollarSign className="w-5 h-5" />
+                
                 Amount (₦)
               </label>
               <input

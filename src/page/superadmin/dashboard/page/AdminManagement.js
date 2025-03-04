@@ -27,7 +27,7 @@ const AdminManagement = () => {
     const fetchAdmins = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`http://localhost:3005/admin/get-all-admins?type=${adminViewType}`, {
+        const response = await axios.get(`https://newportal-backend.onrender.com/admin/get-all-admins?type=${adminViewType}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           }
@@ -54,7 +54,7 @@ const AdminManagement = () => {
       setCreateLoading(true);
       
       try {
-        const response = await axios.post('http://localhost:3005/admin/create-admin', formData, {
+        const response = await axios.post('https://newportal-backend.onrender.com/admin/create-admin', formData, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           }
@@ -85,7 +85,7 @@ const AdminManagement = () => {
       if (window.confirm('Are you sure you want to delete this admin?')) {
         console.log(adminId)
         try {
-          const response = await axios.delete(`http://localhost:3005/admin/delete-admin/${adminId}`, {
+          const response = await axios.delete(`https://newportal-backend.onrender.com/admin/delete-admin/${adminId}`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('token')}`
             }

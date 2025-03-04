@@ -35,7 +35,7 @@ const PropertyList = () => {
 
   const fetchProperties = async () => {
     try {
-      const { data } = await axios.get("http://localhost:3005/admin/properties", {
+      const { data } = await axios.get("https://newportal-backend.onrender.com/admin/properties", {
         params: { category, search },
       });
       setProperties(data);
@@ -58,7 +58,7 @@ const PropertyList = () => {
   const handleDelete = async (id) => {
     setDeleteLoading(true);
     try {
-      await axios.delete(`http://localhost:3005/admin/properties/${id}`);
+      await axios.delete(`https://newportal-backend.onrender.com/admin/properties/${id}`);
       setProperties(properties.filter((p) => p._id !== id));
       toast.success("Property deleted successfully");
     } catch (err) {
@@ -73,7 +73,7 @@ const PropertyList = () => {
     setEditLoading(true);
     try {
       const { data } = await axios.put(
-        `http://localhost:3005/admin/properties/${formData._id}`,
+        `https://newportal-backend.onrender.com/admin/properties/${formData._id}`,
         formData
       );
       setProperties(properties.map((p) => (p._id === data._id ? data : p)));

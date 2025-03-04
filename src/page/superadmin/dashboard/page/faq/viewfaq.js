@@ -23,7 +23,7 @@ const ViewFAQ = () => {
 
   const fetchFAQs = async () => {
     try {
-      const { data } = await axios.get("http://localhost:3005/admin/view/faq");
+      const { data } = await axios.get("https://newportal-backend.onrender.com/admin/view/faq");
       setFaqs(data);
     } catch (err) {
       toast.error("Failed to fetch FAQs");
@@ -34,7 +34,7 @@ const ViewFAQ = () => {
 
   const fetchProperties = async () => {
     try {
-      const { data } = await axios.get("http://localhost:3005/admin/faq/properties");
+      const { data } = await axios.get("https://newportal-backend.onrender.com/admin/faq/properties");
       setProperties(data);
     } catch (err) {
       toast.error("Failed to fetch properties");
@@ -53,7 +53,7 @@ const ViewFAQ = () => {
   const handleDelete = async (id) => {
     setDeleteLoading(id);
     try {
-      await axios.delete(`http://localhost:3005/admin/afaq/${id}`);
+      await axios.delete(`https://newportal-backend.onrender.com/admin/afaq/${id}`);
       setFaqs(faqs.filter(faq => faq._id !== id));
       toast.success("FAQ deleted successfully");
     } catch (err) {
@@ -68,7 +68,7 @@ const ViewFAQ = () => {
     setEditLoading(true);
     try {
       const { data } = await axios.put(
-        `http://localhost:3005/admin/faq/${selectedFaq._id}`,
+        `https://newportal-backend.onrender.com/admin/faq/${selectedFaq._id}`,
         selectedFaq
       );
       setFaqs(faqs.map(f => f._id === data._id ? data : f));

@@ -120,7 +120,7 @@ const App = () => {
             />
             <div className="p-4">
               <p className="text-sm text-gray-600">
-                <strong>Amount:</strong> ${selectedProperty.amount}
+                <strong>Amount:</strong> ₦{selectedProperty.amount}
               </p>
               <p className="text-sm text-gray-600">
                 <strong>Location:</strong> {selectedProperty.city},{" "}

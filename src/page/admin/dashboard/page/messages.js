@@ -17,7 +17,7 @@ const ViewMessages = () => {
 
   const fetchTickets = async () => {
     try {
-      const { data } = await axios.get("http://localhost:3005/admin/ticket");
+      const { data } = await axios.get("https://newportal-backend.onrender.com/admin/ticket");
       setTickets(data);
     } catch (err) {
       toast.error("Failed to fetch messages");
@@ -29,7 +29,7 @@ const ViewMessages = () => {
   const handleReply = async (ticketId) => {
     setReplyLoading(ticketId);
     try {
-      await axios.post(`http://localhost:3005/admin/ticket/${ticketId}/reply`, {
+      await axios.post(`https://newportal-backend.onrender.com/admin/ticket/${ticketId}/reply`, {
         content: replyContent,
       });
       toast.success("Reply sent successfully");
@@ -59,7 +59,14 @@ const ViewMessages = () => {
               <thead>
                 <tr className="bg-[#002657] text-white">
                   <th className="border border-gray-300 px-4 py-2">No</th>
-                  <th className="border border-gray-300 px-4 py-2">User</th>
+                  <th className="border border-gray-300 px-4 py-2">
+            firstName
+                  </th>
+                  <th className="border border-gray-300 px-4 py-2">Second Name</th>
+                  <th className="border border-gray-300 px-4 py-2">Username</th>
+                  <th className="border border-gray-300 px-4 py-2">usertype</th>
+                  <th className="border border-gray-300 px-4 py-2">Phonenumber</th>
+                  <th className="border border-gray-300 px-4 py-2">Email</th>
                   <th className="border border-gray-300 px-4 py-2">Subject</th>
                   <th className="border border-gray-300 px-4 py-2">Messages</th>
                   <th className="border border-gray-300 px-4 py-2">Status</th>
@@ -70,7 +77,13 @@ const ViewMessages = () => {
                 {tickets.map((ticket, index) => (
                   <tr key={ticket._id} className="text-sm text-gray-700 hover:bg-gray-50">
                     <td className="border border-gray-300 px-4 py-2 text-center">{index + 1}</td>
-                    <td className="border border-gray-300 px-4 py-2">{ticket.user?.username || "N/A"}</td>
+                    <td className="border border-gray-300 px-4 py-2">{ticket.user?.firstName || "N/A"}</td>
+                    <td className="border border-gray-300 px-4 py-2">{ticket.lastName}</td>
+                    <td className="border border-gray-300 px-4 py-2">{ticket.username || "N/A"}</td>
+                    <td className="border border-gray-300 px-4 py-2">{ticket.messages.sender}</td>
+                    <td className="border border-gray-300 px-4 py-2">{ticket.phone || "N/A"}</td>
+                    <td className="border border-gray-300 px-4 py-2">{ticket.email || "N/A"}</td>
+                    <td className="border border-gray-300 px-4 py-2">{ticket.subject}</td>
                     <td className="border border-gray-300 px-4 py-2">{ticket.subject}</td>
                     <td className="border border-gray-300 px-4 py-2">
                       <div className="space-y-2">

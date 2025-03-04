@@ -15,7 +15,7 @@ const AdminDashboard = () => {
     const fetchData = async () => {
       try {
         const [statsRes, earningsRes] = await Promise.all([
-          axios.get('http://localhost:3005/admin/dashboard-stats'),
+          axios.get('https://newportal-backend.onrender.com/admin/dashboard-stats'),
         ]);
         setStats(statsRes.data);
         setEarnings(earningsRes.data);

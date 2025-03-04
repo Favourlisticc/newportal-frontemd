@@ -25,7 +25,7 @@ const ContactSupport = () => {
 
 
   // Fetch user data from localStorage
-  const storedRealtorData = localStorage.getItem("realtorData");
+  const storedRealtorData = localStorage.getItem("Clientuser");
   const parsedData = JSON.parse(storedRealtorData);
   const userid = parsedData?._id;
 
@@ -48,7 +48,7 @@ const ContactSupport = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`https://newportal-backend.onrender.com/realtor/support`, {
+      const response = await axios.post(`https://newportal-backend.onrender.com/client/support`, {
         user: parsedData?._id,
         firstName: parsedData?.firstName,
         lastName: parsedData?.lastName,

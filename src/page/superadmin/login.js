@@ -14,11 +14,12 @@ const generateCaptcha = () => {
   return captcha;
 };
 
-const AdminLogin = () => {
+const SuperAdminLogin = () => {
   const [formData, setFormData] = useState({
     username: "",
     password: "",
-    captchaInput: ""
+    captchaInput: "",
+    adminType: "superadmin" // Set superadmin type explicitly
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -31,8 +32,9 @@ const AdminLogin = () => {
   useEffect(() => {
     const token = localStorage.getItem("SuperAdmintoken");
     const username = localStorage.getItem("SuperAdminusername");
+    const adminType = localStorage.getItem("AdminType");
 
-    if (token && username) {
+    if (token && username && adminType === "superadmin") {
       // Redirect to the dashboard if the user is already logged in
       navigate("/superadmin-dashboard");
     }
@@ -94,8 +96,10 @@ const AdminLogin = () => {
     const newErrors = {};
 
     Object.keys(formData).forEach(key => {
-      const error = validateField(key, formData[key]);
-      if (error) newErrors[key] = error;
+      if (key !== "adminType") {
+        const error = validateField(key, formData[key]);
+        if (error) newErrors[key] = error;
+      }
     });
 
     if (Object.keys(newErrors).length > 0) {
@@ -107,21 +111,25 @@ const AdminLogin = () => {
 
     try {
       const response = await axios.post(
-        "https://newportal-backend.onrender.com/auth/admin/login",
+        "http://localhost:3005/auth/admin/login",
         {
           username: formData.username,
           password: formData.password,
           captcha: formData.captchaInput,
+          adminType: formData.adminType // Send adminType with request
         }
       );
 
-      toast.success("Login Successful!");
+      toast.success("SuperAdmin Login Successful!");
       localStorage.setItem("SuperAdmintoken", response.data.token);
       localStorage.setItem("SuperAdminusername", response.data.username);
+      localStorage.setItem("AdminType", response.data.adminType);
+      localStorage.setItem("SuperAdminFirstName", response.data.firstName);
+      localStorage.setItem("SuperAdminLastName", response.data.lastName);
 
       setTimeout(() => navigate('/superadmin-dashboard'), 3000);
       
-      setFormData({ username: "", password: "", captchaInput: "" });
+      setFormData({ username: "", password: "", captchaInput: "", adminType: "superadmin" });
       refreshCaptcha();
     } catch (error) {
       const message = error.response?.data?.message || "Login Failed";
@@ -137,14 +145,24 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-teal-400 to-cyan-500">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-teal-600 to-cyan-700">
       <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md transition-all duration-300 hover:shadow-2xl">
-        <div className='flex justify-center items-center'>
+        <div className="relative flex justify-center items-center">
           <img src={logo} className='w-32 h-32' alt="Baay Realty Logo" />
+          <div className="absolute -top-2 -right-2 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+            SUPER ADMIN
+          </div>
         </div>
-        <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
+        <h2 className="text-3xl font-bold text-center mb-2 text-gray-800">
           SuperAdmin Portal
         </h2>
+        <p className="text-center text-gray-600 mb-6">System Management Access</p>
+        
+        {errors.serverError && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <span className="block sm:inline">{errors.serverError}</span>
+          </div>
+        )}
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -163,7 +181,7 @@ const AdminLogin = () => {
               className={`w-full px-4 py-3 rounded-lg border ${
                 errors.username ? "border-red-500" : "border-gray-300"
               } focus:ring-2 focus:ring-teal-500 focus:border-transparent`}
-              placeholder="Enter username"
+              placeholder="Enter your email"
               autoComplete="username"
             />
             {errors.username && (
@@ -307,7 +325,7 @@ const AdminLogin = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold rounded-lg transition-all duration-300 flex items-center justify-center disabled:opacity-75"
+            className="w-full py-3 px-4 bg-gradient-to-r from-teal-600 to-cyan-700 hover:from-teal-700 hover:to-cyan-800 text-white font-semibold rounded-lg transition-all duration-300 flex items-center justify-center disabled:opacity-75"
           >
             {loading ? (
               <>
@@ -333,7 +351,7 @@ const AdminLogin = () => {
                 Authenticating...
               </>
             ) : (
-              "Sign In"
+              "SuperAdmin Access"
             )}
           </button>
         </form>
@@ -354,4 +372,4 @@ const AdminLogin = () => {
   );
 };
 
-export default AdminLogin;
+export default SuperAdminLogin;

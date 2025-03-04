@@ -31,7 +31,7 @@ export default function ActivationEarnings() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3005/admin/view-commissions');
+      const response = await fetch('https://newportal-backend.onrender.com/admin/view-commissions');
       const result = await response.json();
       setData(result);
     } catch (error) {
@@ -50,7 +50,7 @@ export default function ActivationEarnings() {
     setIsEditing(true);
     try {
       const response = await fetch(
-        `http://localhost:3005/admin/edit-commissions/${currentCommission._id}`,
+        `https://newportal-backend.onrender.com/admin/edit-commissions/${currentCommission._id}`,
         {
           method: 'PUT',
           headers: {
@@ -77,7 +77,7 @@ export default function ActivationEarnings() {
     if (window.confirm('Are you sure you want to delete this commission?')) {
       try {
         const response = await fetch(
-          `http://localhost:3005/admin/delete-commissions/${id}`,
+          `https://newportal-backend.onrender.com/admin/delete-commissions/${id}`,
           { method: 'DELETE' }
         );
         if (response.ok) {

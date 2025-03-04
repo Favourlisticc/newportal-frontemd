@@ -13,7 +13,7 @@ const PendingWithdrawals = () => {
   const fetchWithdrawals = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:3005/admin/withdrawals/${activeTab}`);
+      const response = await axios.get(`https://newportal-backend.onrender.com/admin/withdrawals/${activeTab}`);
       setWithdrawals(response.data);
     } catch (error) {
       toast.error('Failed to load withdrawals');
@@ -28,7 +28,7 @@ const PendingWithdrawals = () => {
 
   const handleStatusUpdate = async (id, newStatus) => {
     try {
-      await axios.put(`http://localhost:3005/admin/withdrawals/${id}`, { status: newStatus });
+      await axios.put(`https://newportal-backend.onrender.com/admin/withdrawals/${id}`, { status: newStatus });
       toast.success(`Withdrawal ${newStatus}`);
       fetchWithdrawals();
     } catch (error) {

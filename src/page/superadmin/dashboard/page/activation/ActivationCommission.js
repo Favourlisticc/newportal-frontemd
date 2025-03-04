@@ -19,7 +19,7 @@ const ActivationCommission = () => {
   const fetchCommissions = async () => {
     setTableLoading(true);
     try {
-      const response = await axios.get("http://localhost:3005/admin/commissions");
+      const response = await axios.get("https://newportal-backend.onrender.com/admin/commissions");
       console.log("API Response:", response.data); // Debugging
       setTableData(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
@@ -38,7 +38,7 @@ const ActivationCommission = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost:3005/admin/commissions", {
+      const response = await axios.post("https://newportal-backend.onrender.com/admin/commissions", {
         ...commissions,
         timestamp: new Date().toISOString(),
       });

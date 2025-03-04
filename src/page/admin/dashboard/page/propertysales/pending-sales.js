@@ -14,7 +14,7 @@ const PendingSalesHistory = () => {
 
   const fetchPendingPurchases = async () => {
     try {
-      const response = await axios.get("http://localhost:3005/admin/purchases/pending");
+      const response = await axios.get("https://newportal-backend.onrender.com/admin/purchases/pending");
       setPurchases(response.data);
       setIsLoading(false);
     } catch (error) {
@@ -26,7 +26,7 @@ const PendingSalesHistory = () => {
   const handleStatusChange = async (id, newStatus) => {
     setActionLoading(prev => ({ ...prev, [id]: true }));
     try {
-      await axios.patch(`http://localhost:3005/admin/purchases/${id}/status`, { status: newStatus });
+      await axios.patch(`https://newportal-backend.onrender.com/admin/purchases/${id}/status`, { status: newStatus });
       toast.success(`Purchase ${newStatus} successfully!`);
       await fetchPendingPurchases();
     } catch (error) {
@@ -38,7 +38,7 @@ const PendingSalesHistory = () => {
   const handleDelete = async (id) => {
     setActionLoading(prev => ({ ...prev, [id]: true }));
     try {
-      await axios.delete(`http://localhost:3005/admin/purchases/${id}`);
+      await axios.delete(`https://newportal-backend.onrender.com/admin/purchases/${id}`);
       toast.success("Purchase deleted successfully!");
       setPurchases(prev => prev.filter(p => p._id !== id));
     } catch (error) {

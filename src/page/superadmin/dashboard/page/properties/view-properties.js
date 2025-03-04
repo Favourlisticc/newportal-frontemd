@@ -35,7 +35,7 @@ const PropertyList = () => {
 
   const fetchProperties = async () => {
     try {
-      const { data } = await axios.get("http://localhost:3005/admin/properties", {
+      const { data } = await axios.get("https://newportal-backend.onrender.com/admin/properties", {
         params: { category, search },
       });
       setProperties(data);
@@ -58,7 +58,7 @@ const PropertyList = () => {
   const handleDelete = async (id) => {
     setDeleteLoading(true);
     try {
-      await axios.delete(`http://localhost:3005/admin/properties/${id}`);
+      await axios.delete(`https://newportal-backend.onrender.com/admin/properties/${id}`);
       setProperties(properties.filter((p) => p._id !== id));
       toast.success("Property deleted successfully");
     } catch (err) {
@@ -73,7 +73,7 @@ const PropertyList = () => {
     setEditLoading(true);
     try {
       const { data } = await axios.put(
-        `http://localhost:3005/admin/properties/${formData._id}`,
+        `https://newportal-backend.onrender.com/admin/properties/${formData._id}`,
         formData
       );
       setProperties(properties.map((p) => (p._id === data._id ? data : p)));
@@ -189,7 +189,7 @@ const PropertyList = () => {
 
       {/* Detail Modal */}
       {selectedProperty && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-10">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold text-[#002657] mb-4">
               {selectedProperty.propertyName}
