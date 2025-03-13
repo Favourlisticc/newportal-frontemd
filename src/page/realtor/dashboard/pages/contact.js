@@ -99,7 +99,7 @@ const ContactSupport = () => {
   };
 
   return (
-    <div className="container p-6 max-sm:p-0 max-w-4xl">
+    <div className="container p-6 max-sm:p-4 max-w-4xl ">
       <div className="bg-white shadow-xl rounded-lg p-6 mb-6 transition-all">
         <div 
           onClick={() => setIsOpen(!isOpen)}

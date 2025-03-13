@@ -1,6 +1,6 @@
 // Sidebar.jsx
 import { NavLink } from 'react-router-dom';
-import { FiHome, FiFileText, FiActivity, FiCalendar, FiUpload } from 'react-icons/fi';
+import { FiHome, FiFileText, FiActivity, FiCalendar, FiUpload, FiX } from 'react-icons/fi';
 import {
   FaFileAlt, FaQuestionCircle, FaRegBuilding
 } from 'react-icons/fa';
@@ -9,13 +9,13 @@ import { RiAccountBoxLine } from "react-icons/ri";
 import { FcDebt } from "react-icons/fc";
 import logo from "../../../public/BR (2).jpg";
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
   const navItems = [
     { to: "/client-dashboard", icon: FiHome, text: "Dashboard" },
-    { to: "/client-dashboard/products", icon: FiFileText, text: "Products" },
+    { to: "/client-dashboard/products", icon: FiFileText, text: "Properties" },
     { to: "/client-dashboard/unsettled-sales", icon: FcDebt, text: "Unsettled Sales" },
     { to: "/client-dashboard/purchasehistory", icon: MdWorkHistory, text: "Purchase Record" },
-    { to: "/client-dashboard/upload", icon: FiUpload, text: "Data Upload/Contract Signing" },
+    { to: "/client-dashboard/upload", icon: FiUpload, text: "Data Upload" },
     { to: "/client-dashboard/profile", icon: RiAccountBoxLine, text: "Profile" },
     { to: "/client-dashboard/contact-support", icon: FaRegBuilding, text: "Message Support" },
     { to: "/client-dashboard/add-testimonials", icon: FaFileAlt, text: "Testimonials" },
@@ -24,11 +24,14 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="w-64 bg-indigo-900 text-white fixed h-full flex flex-col">
-      <div className="flex justify-center items-center mt-8">
+    <div className={`w-64 bg-indigo-900 text-white fixed h-full flex flex-col transform transition-transform duration-300 z-[999] ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+      <div className="flex justify-between items-center p-4 lg:hidden">
         <img src={logo} className="w-32 h-32" alt="Logo" />
+        <button onClick={onClose} className="text-white hover:text-gray-400">
+          <FiX className="w-6 h-6" />
+        </button>
       </div>
-      <div className="p-6 text-2xl font-bold">Client Dashboard</div>
+      <div className="p-6 text-2xl font-bold hidden lg:block">Client Dashboard</div>
       <div className="flex-1 overflow-y-auto">
         <nav className="mt-6">
           {navItems.map((item, index) => (

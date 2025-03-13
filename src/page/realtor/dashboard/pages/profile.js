@@ -312,7 +312,7 @@ const ProfilePage = () => {
                 <label className="block text-gray-700 text-left">Bank Name</label>
                 <input
                   type="text"
-                  name="bankName"
+                  name="bank"
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring ${
                     isEditing ? "focus:ring-green-300" : "bg-gray-200"
                   }`}
@@ -377,6 +377,11 @@ const ProfilePage = () => {
 
         {activeTab === "updateProfilePic" && (
           <div className="space-y-4">
+              {previewUrl && (
+              <div className="mt-4 flex justify-center">
+                <img src={previewUrl} alt="Profile Preview" className="w-32 h-32 rounded-full" />
+              </div>
+            )}
             <div>
               <label className="block text-gray-700">Upload Profile Picture</label>
               <input
@@ -385,11 +390,7 @@ const ProfilePage = () => {
                 onChange={handleImageChange}
               />
             </div>
-            {previewUrl && (
-              <div className="mt-4">
-                <img src={previewUrl} alt="Profile Preview" className="w-32 h-32 rounded-full" />
-              </div>
-            )}
+          
             <button
               className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
               onClick={handleImageUpload}

@@ -9,7 +9,7 @@ const CommissionPage = () => {
   useEffect(() => {
     const fetchCommissions = async () => {
       try {
-        const response = await fetch(`https://newportal-backend.onrender.com/realtor/view-commission?realtorId=${realtorId}`, {
+        const response = await fetch(`http://localhost:3005/realtor/view-commission?realtorId=${realtorId}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('realtorJwt')}`
           }
@@ -27,6 +27,8 @@ const CommissionPage = () => {
       fetchCommissions();
     }
   }, [realtorId]);
+
+  console.log("commissions", commissions)
 
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };

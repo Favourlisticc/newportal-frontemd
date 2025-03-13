@@ -4,7 +4,7 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Swal from 'sweetalert2';
-import { Building2, Upload, Briefcase, MapPin, Gift, Heart, Image, Calendar, User, Mail, Phone, Lock, CreditCard, Eye, EyeOff, HandCoins } from 'lucide-react';
+import { Building2, Upload, Briefcase, MapPin, Gift, Heart, Image, Calendar, User, Mail, Phone, Lock, CreditCard, Eye, EyeOff, HandCoins, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useParams } from "react-router-dom";
 import logo from "../../../public/Baay Realty logo (2).png";
 
@@ -19,6 +19,7 @@ const SignupForm = () => {
   const [resendTimer, setResendTimer] = useState(0);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [otpExpiry, setOtpExpiry] = useState(null);
+  const [currentStep, setCurrentStep] = useState(1); // Track the current step/card
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -40,15 +41,12 @@ const SignupForm = () => {
     nextOfKinRelationship: '',
     nextOfKinEmail: '',
     nextOfKinPhone: '',
-    employerName: '',
-    employerAddress: '',
-    employerEmail: '',
-    employerPhone: '',
+    occupation: '',
+    officeAddress: '',
     propertyId: '',
     paymentMethod: '',
     amount: '',
     referralCode: referralId,
-    // proofOfPayment: "",
     termsAccepted: false,
   });
 
@@ -142,7 +140,7 @@ const SignupForm = () => {
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
   const toggleConfirmPasswordVisibility = () => setShowConfirmPassword(!showConfirmPassword);
 
-  const validateForm = () => {
+  const validateStep1 = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^\d{10}$/;
 
@@ -158,18 +156,6 @@ const SignupForm = () => {
       toast.error('Phone number must be 10 digits');
       return false;
     }
-    if (formData.password.length < 6) {
-      toast.error('Password must be at least 6 characters');
-      return false;
-    }
-    if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
-      return false;
-    }
-    if (!formData.termsAccepted) {
-      toast.error('You must accept the terms and conditions');
-      return false;
-    }
     if (!formData.dateOfBirth) {
       toast.error('Date of Birth is required');
       return false;
@@ -178,31 +164,68 @@ const SignupForm = () => {
       toast.error('Gender is required');
       return false;
     }
-    if (!formData.country) {
-      toast.error('Country is required');
+    if (!formData.passportPhoto) {
+      toast.error('Passport Photo is required');
       return false;
     }
+    if (!formData.address || !formData.city || !formData.state || !formData.country) {
+      toast.error('Address details are required');
+      return false;
+    }
+    return true;
+  };
+
+  const validateStep2 = () => {
     if (!formData.nextOfKinName || !formData.nextOfKinRelationship || !formData.nextOfKinEmail || !formData.nextOfKinPhone) {
       toast.error('Next of Kin Details are required');
       return false;
     }
-    if (!formData.employerName || !formData.employerAddress || !formData.employerEmail || !formData.employerPhone) {
-      toast.error('Employer Details are required');
+    if (!formData.occupation || !formData.officeAddress) {
+      toast.error('Occupation Details are required');
+      return false;
+    }
+    return true;
+  };
+
+  const validateStep3 = () => {
+    if (formData.password.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return false;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match');
       return false;
     }
     if (!formData.propertyId || !formData.paymentMethod || !formData.amount) {
       toast.error('Property Details are required');
       return false;
     }
-    if (!formData.passportPhoto) {
-      toast.error('Passport Photo is required');
+    if (!formData.termsAccepted) {
+      toast.error('You must accept the terms and conditions');
       return false;
     }
-    // if (!formData.proofOfPayment) {
-    //   toast.error('Proof of Payment is required');
-    //   return false;
-    // }
     return true;
+  };
+
+  const validateForm = () => {
+    if (currentStep === 1) return validateStep1();
+    if (currentStep === 2) return validateStep2();
+    if (currentStep === 3) return validateStep3();
+    return true;
+  };
+
+  const handleNext = () => {
+    if (currentStep === 1 && validateStep1()) {
+      setCurrentStep(2);
+    } else if (currentStep === 2 && validateStep2()) {
+      setCurrentStep(3);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
   };
 
   const sendOtp = async () => {
@@ -370,21 +393,9 @@ const SignupForm = () => {
         'https://api.cloudinary.com/v1_1/dwpoik1jm/image/upload',
         passportPhotoData
       );
-  
-      // // Upload proofOfPayment to Cloudinary
-      // const proofOfPaymentData = new FormData();
-      // proofOfPaymentData.append('file', formData.proofOfPayment);
-      // proofOfPaymentData.append('upload_preset', 'giweexpv');
-      // const proofOfPaymentResponse = await axios.post(
-      //   'https://api.cloudinary.com/v1_1/dwpoik1jm/image/upload',
-      //   proofOfPaymentData
-      // );
-  
-      // Prepare user data with uploaded file URLs
       const userData = {
         ...formData,
         passportPhoto: passportPhotoResponse.data.secure_url,
-        // proofOfPayment: proofOfPaymentResponse.data.secure_url,
         propertyName: selectedProperty.propertyName,
         propertyActualPrice: selectedProperty.amount,
       };
@@ -408,6 +419,9 @@ const SignupForm = () => {
             </a>
           </div>
           <p style="color: #FF0000; font-weight: bold;">Important: Your property sale will not be approved until you send the completed form!</p>
+
+          <p style="color: #FF0000; font-weight: bold;">Important: You have to submit the require document to the whatsapp number before the "I Have Sent The Files" button can work !</p>
+
         `,
         showCancelButton: false,
         confirmButtonText: 'I Have Sent The Files',
@@ -440,7 +454,7 @@ const SignupForm = () => {
       }).then(async (result) => {
         if (result.isConfirmed) {
           // Send data to the backend
-          const response = await axios.post('https://newportal-backend.onrender.com/client/signup', userData);
+          const response = await axios.post('http://localhost:3005/client/signup', userData);
 
           // Handle backend response
           const { token, user } = response.data;
@@ -477,512 +491,567 @@ const SignupForm = () => {
     sendOtp(); // Start the OTP verification process
   };
 
+  // Progress indicator
+  const ProgressBar = () => (
+    <div className="mb-8">
+      <div className="flex justify-between">
+        <div className={`flex flex-col items-center`}>
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${currentStep >= 1 ? 'bg-[#002657] text-white' : 'bg-gray-200'}`}>1</div>
+          <span className="text-sm mt-1">Personal</span>
+        </div>
+        <div className={`flex-1 h-0.5 self-center ${currentStep >= 2 ? 'bg-[#002657]' : 'bg-gray-200'}`}></div>
+        <div className={`flex flex-col items-center`}>
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${currentStep >= 2 ? 'bg-[#002657] text-white' : 'bg-gray-200'}`}>2</div>
+          <span className="text-sm mt-1">Details</span>
+        </div>
+        <div className={`flex-1 h-0.5 self-center ${currentStep >= 3 ? 'bg-[#002657]' : 'bg-gray-200'}`}></div>
+        <div className={`flex flex-col items-center`}>
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${currentStep >= 3 ? 'bg-[#002657] text-white' : 'bg-gray-200'}`}>3</div>
+          <span className="text-sm mt-1">Property</span>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className='flex justify-center mb-9 items-center'>
-        <img src={logo} className='w-32 h-32' />
+        <img src={logo} className='w-32 h-32' alt="Baay Realty Logo" />
       </div>
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-8">
         <h2 className="text-3xl font-bold text-center mb-8" style={{ color: '#002657' }}>
           Complete your payment proof upload and create your account
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Personal Information Column */}
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold">Personal Info</h3>
+        <ProgressBar />
 
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <User className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                First Name
-              </label>
-              <input
-                type="text"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Card 1: Personal Information */}
+          {currentStep === 1 && (
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-bold mb-6">Personal Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="flex items-center text-sm font-medium mb-2">
+                    <User className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                    First Name*
+                  </label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="flex items-center text-sm font-medium mb-2">
+                    <User className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                    Last Name*
+                  </label>
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="flex items-center text-sm font-medium mb-2">
+                    <User className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="flex items-center text-sm font-medium mb-2">
+                    <Mail className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                    Email*
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="flex items-center text-sm font-medium mb-2">
+                    <Phone className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                    Phone*
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="flex items-center text-sm font-medium mb-2">
+                    <Calendar className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                    Date of Birth*
+                  </label>
+                  <input
+                    type="date"
+                    name="dateOfBirth"
+                    value={formData.dateOfBirth}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="flex items-center text-sm font-medium mb-2">
+                    <User className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                    Gender*
+                  </label>
+                  <select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                    required
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="flex items-center text-sm font-medium mb-2">
+                    <MapPin className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                    Address*
+                  </label>
+                  <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="flex items-center text-sm font-medium mb-2">
+                    <MapPin className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                    City*
+                  </label>
+                  <input
+                    type="text"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="flex items-center text-sm font-medium mb-2">
+                    <MapPin className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                    State*
+                  </label>
+                  <input
+                    type="text"
+                    name="state"
+                    value={formData.state}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="flex items-center text-sm font-medium mb-2">
+                    <MapPin className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                    Country*
+                  </label>
+                  <input
+                    type="text"
+                    name="country"
+                    value={formData.country}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="flex items-center text-sm font-medium mb-2">
+                    <MapPin className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                    ZipCode
+                  </label>
+                  <input
+                    type="text"
+                    name="zipCode"
+                    value={formData.zipCode}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="flex items-center text-sm font-medium mb-2">
+                    <Image className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                    Passport Photo*
+                  </label>
+                  <input
+                    type="file"
+                    name="passportPhoto"
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    className="mt-1 block w-full text-sm text-gray-500
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-full file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-[#002657] file:text-white
+                      hover:file:bg-[#E5B305]"
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className="flex justify-end mt-6">
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="py-2 px-4 flex items-center rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: '#002657' }}
+                >
+                  Next
+                  <ChevronRight className="ml-2 w-5 h-5" />
+                </button>
+              </div>
             </div>
+          )}
 
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <User className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Last Name
-              </label>
-              <input
-                type="text"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
+          {/* Card 2: Details */}
+          {currentStep === 2 && (
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Next of Kin Details */}
+                <div className="space-y-6">
+                  <h3 className="text-xl font-bold">Next of Kin Details</h3>
+
+                  <div>
+                    <label className="flex items-center text-sm font-medium mb-2">
+                      <User className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      Full Name*
+                    </label>
+                    <input
+                      type="text"
+                      name="nextOfKinName"
+                      value={formData.nextOfKinName}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="flex items-center text-sm font-medium mb-2">
+                      <Heart className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      Relationship*
+                    </label>
+                    <input
+                      type="text"
+                      name="nextOfKinRelationship"
+                      value={formData.nextOfKinRelationship}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="flex items-center text-sm font-medium mb-2">
+                      <Mail className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      Email*
+                    </label>
+                    <input
+                      type="email"
+                      name="nextOfKinEmail"
+                      value={formData.nextOfKinEmail}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="flex items-center text-sm font-medium mb-2">
+                      <Phone className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      Phone*
+                    </label>
+                    <input
+                      type="tel"
+                      name="nextOfKinPhone"
+                      value={formData.nextOfKinPhone}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Work & Referral Details */}
+                <div className="space-y-6">
+                  <h3 className="text-xl font-bold">Work & Referral Details</h3>
+
+                  <div>
+                    <label className="flex items-center text-sm font-medium mb-2">
+                      <Briefcase className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      Occupation*
+                    </label>
+                    <input
+                      type="text"
+                      name="occupation"
+                      value={formData.occupation}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="flex items-center text-sm font-medium mb-2">
+                      <MapPin className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      Office Address*
+                    </label>
+                    <input
+                      type="text"
+                      name="officeAddress"
+                      value={formData.officeAddress}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="flex items-center text-sm font-medium mb-2">
+                      <Gift className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      Referral Code
+                    </label>
+                    <input
+                      type="text"
+                      name="referralCode"
+                      value={formData.referralCode}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                    />
+                    {referrerDetails && (
+                      <p className="text-sm text-gray-600 mt-1">Referred by: {referrerDetails.firstName} {referrerDetails.lastName}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-between mt-6">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="py-2 px-4 flex items-center rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: '#E5B305' }}
+                >
+                  <ChevronLeft className="mr-2 w-5 h-5" />
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="py-2 px-4 flex items-center rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: '#002657' }}
+                >
+                  Next
+                  <ChevronRight className="ml-2 w-5 h-5" />
+                </button>
+              </div>
             </div>
+          )}
 
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <User className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Username
-              </label>
-              <input
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
+          {/* Card 3: Account & Property Payment */}
+          {currentStep === 3 && (
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Property Purchase */}
+                <div className="space-y-6">
+                  <h3 className="text-xl font-bold">Property Purchase</h3>
+
+                  <div>
+                    <label className="flex items-center text-sm font-medium mb-2">
+                      <Building2 className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      Select Property*
+                    </label>
+                    <select
+                      name="propertyId"
+                      value={formData.propertyId}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                      required
+                    >
+                      <option value="">Select a property</option>
+                      {properties.map(property => (
+                        <option key={property._id} value={property._id}>
+                          {property.propertyName} - ₦{property.amount}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="flex items-center text-sm font-medium mb-2">
+                      <CreditCard className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      Payment Method*
+                    </label>
+                    <select
+                      name="paymentMethod"
+                      value={formData.paymentMethod}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                      required
+                    >
+                      <option value="">Select payment method</option>
+                      <option value="full">Full Payment</option>
+                      <option value="installment">Installment</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="flex items-center text-sm font-medium mb-2">
+                      <HandCoins className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      Amount*
+                    </label>
+                    <input
+                      type="text"
+                      name="amount"
+                      value={formData.amount}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                      required
+                    />
+                  </div>
+
+                  <div className="flex items-center mt-4">
+                    <input
+                      type="checkbox"
+                      name="termsAccepted"
+                      checked={formData.termsAccepted}
+                      onChange={handleInputChange}
+                      className="h-4 w-4 text-[#002657] focus:ring-[#E5B305] border-gray-300 rounded"
+                      required
+                    />
+                    <label className="ml-2 block text-sm text-gray-900">
+                      I accept the terms and conditions*
+                    </label>
+                  </div>
+                </div>
+
+                {/* Password Section */}
+                <div className="space-y-6">
+                  <h3 className="text-xl font-bold">Create Password</h3>
+
+                  <div className="relative">
+                    <label className="flex items-center text-sm font-medium mb-2">
+                      <Lock className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      Password*
+                    </label>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="absolute inset-y-0 right-0 pr-3 pt-8 flex items-center"
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
+
+                  <div className="relative">
+                    <label className="flex items-center text-sm font-medium mb-2">
+                      <Lock className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      Confirm Password*
+                    </label>
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={toggleConfirmPasswordVisibility}
+                      className="absolute inset-y-0 right-0 pr-3 pt-8 flex items-center"
+                    >
+                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
+                </div>
+
+                
+              </div>
+
+              <div className="flex justify-between mt-6">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="py-2 px-4 flex items-center rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: '#E5B305' }}
+                >
+                  <ChevronLeft className="mr-2 w-5 h-5" />
+                  Back
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="py-2 px-4 rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: '#002657' }}
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center">
+                      <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                      </svg>
+                      Processing...
+                    </span>
+                  ) : (
+                    'Sign Up & Purchase Property'
+                  )}
+                </button>
+              </div>
             </div>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Mail className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
-            </div>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Phone className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Phone
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
-            </div>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Calendar className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Date of Birth
-              </label>
-              <input
-                type="date"
-                name="dateOfBirth"
-                value={formData.dateOfBirth}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
-            </div>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <User className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Gender
-              </label>
-              <select
-                name="gender"
-                value={formData.gender}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              >
-                <option value="">Select Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Phone className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Address
-              </label>
-              <input
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
-            </div>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Phone className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                City
-              </label>
-              <input
-                type="text"
-                name="city"
-                value={formData.city}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
-            </div>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Phone className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                State
-              </label>
-              <input
-                type="text"
-                name="state"
-                value={formData.state}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
-            </div>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Phone className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Country
-              </label>
-              <input
-                type="text"
-                name="country"
-                value={formData.country}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
-            </div>
-
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Phone className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                ZipCode
-              </label>
-              <input
-                type="text"
-                name="zipCode"
-                value={formData.zipCode}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
-            </div>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Image className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Passport Photo
-              </label>
-              <input
-                type="file"
-                name="passportPhoto"
-                onChange={handleFileChange}
-                accept="image/*"
-                className="mt-1 block w-full text-sm text-gray-500
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-full file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-[#002657] file:text-white
-                  hover:file:bg-[#E5B305]"
-              />
-            </div>
-          </div>
-
-          {/* Next of Kin Details Column */}
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold">Next of Kin Details</h3>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <User className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Full Name
-              </label>
-              <input
-                type="text"
-                name="nextOfKinName"
-                value={formData.nextOfKinName}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
-            </div>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Heart className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Relationship
-              </label>
-              <input
-                type="text"
-                name="nextOfKinRelationship"
-                value={formData.nextOfKinRelationship}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
-            </div>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Mail className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Email
-              </label>
-              <input
-                type="email"
-                name="nextOfKinEmail"
-                value={formData.nextOfKinEmail}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
-            </div>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Phone className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Phone
-              </label>
-              <input
-                type="tel"
-                name="nextOfKinPhone"
-                value={formData.nextOfKinPhone}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
-            </div>
-          </div>
-
-          {/* Employment Details Column */}
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold">Employment Details</h3>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Briefcase className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Employer Name
-              </label>
-              <input
-                type="text"
-                name="employerName"
-                value={formData.employerName}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
-            </div>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <MapPin className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Employer Address
-              </label>
-              <input
-                type="text"
-                name="employerAddress"
-                value={formData.employerAddress}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
-            </div>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Mail className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Employer Email
-              </label>
-              <input
-                type="email"
-                name="employerEmail"
-                value={formData.employerEmail}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
-            </div>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Phone className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Employer Phone
-              </label>
-              <input
-                type="tel"
-                name="employerPhone"
-                value={formData.employerPhone}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
-            </div>
-          </div>
-
-          {/* Referral Section */}
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold">Referral</h3>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Gift className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Referral Code
-              </label>
-              <input
-                type="text"
-                name="referralCode"
-                value={formData.referralCode}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
-            </div>
-
-            {referrerDetails && (
-              <p className="text-gray-700">Referred by: {referrerDetails.firstName} {referrerDetails.lastName}</p>
-            )}
-          </div>
-
-          {/* Account & Property Payment Column */}
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold">Account & Property Payment</h3>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Building2 className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Select Property
-              </label>
-              <select
-                name="propertyId"
-                value={formData.propertyId}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              >
-                <option value="">Select a property</option>
-                {properties.map(property => (
-                  <option key={property._id} value={property._id}>
-                    {property.propertyName} - ₦{property.amount}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <CreditCard className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Payment Method
-              </label>
-              <select
-                name="paymentMethod"
-                value={formData.paymentMethod}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              >
-                <option value="">Select payment method</option>
-                <option value="full">Full Payment</option>
-                <option value="installment">Installment</option>
-              </select>
-            </div>
-
-            {/* <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Upload className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Proof of Payment
-              </label>
-              <input
-                type="file"
-                name="proofOfPayment"
-                onChange={handleFileChange}
-                accept="image/*"
-                className="mt-1 block w-full text-sm text-gray-500
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-full file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-[#002657] file:text-white
-                  hover:file:bg-[#E5B305]"
-              />
-            </div> */}
-
-            <div>
-              <label className="flex items-center text-sm font-medium mb-2">
-                <HandCoins className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Amount
-              </label>
-              <input
-                type="text"
-                name="amount"
-                value={formData.amount}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100 p-2"
-              />
-            </div>
-
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                name="termsAccepted"
-                checked={formData.termsAccepted}
-                onChange={handleInputChange}
-                className="h-4 w-4 text-[#002657] focus:ring-[#E5B305] border-gray-300 rounded"
-              />
-              <label className="ml-2 block text-sm text-gray-900">
-                I accept the terms and conditions
-              </label>
-            </div>
-          </div>
-
-          {/* Password Section */}
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold">Password Section</h3>
-
-            <div className="relative">
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Lock className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Password
-              </label>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
-              <button
-                type="button"
-                onClick={togglePasswordVisibility}
-                className="absolute inset-y-0 right-0 pr-3 pt-8 flex items-center"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
-
-            <div className="relative">
-              <label className="flex items-center text-sm font-medium mb-2">
-                <Lock className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                Confirm Password
-              </label>
-              <input
-                type={showConfirmPassword ? 'text' : 'password'}
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-              />
-              <button
-                type="button"
-                onClick={toggleConfirmPasswordVisibility}
-                className="absolute inset-y-0 right-0 pr-3 pt-8 flex items-center"
-              >
-                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="col-span-full w-full py-3 px-4 rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: '#002657' }}
-          >
-            {loading ? (
-              <span className="flex items-center justify-center">
-                <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                </svg>
-                Processing...
-              </span>
-            ) : (
-              'Sign Up & Purchase Property'
-            )}
-          </button>
+          )}
         </form>
       </div>
       <ToastContainer position="top-right" />

@@ -18,7 +18,9 @@ const TeamTable = () => {
           return;
         }
 
-        const response = await axios.get(`https://newportal-backend.onrender.com/realtor/team/${userId}`);
+        const response = await axios.get(
+          `https://newportal-backend.onrender.com/realtor/team/${userId}`
+        );
         setTeamMembers(response.data.teamMembers);
       } catch (error) {
         toast.error("Error fetching team data");
@@ -31,8 +33,8 @@ const TeamTable = () => {
   }, []);
 
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden">
-      <div className="p-4 flex justify-between items-center">
+    <div className="bg-white shadow-md rounded-lg overflow-hidden max-sm:w-screen m-2" >
+      <div className="p-4 flex justify-between items-center ">
         <div>Show</div>
         <input
           type="text"
@@ -42,40 +44,42 @@ const TeamTable = () => {
       </div>
       {loading ? (
         <div className="flex justify-center p-8">
-         <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-green-500"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-green-500"></div>
         </div>
       ) : (
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-gray-100 border-b">
-              <th className="p-2">No</th>
-              <th className="p-2">Reg Date</th>
-              <th className="p-2">Username</th>
-              <th className="p-2">Name</th>
-              <th className="p-2">Mobile Number</th>
-              <th className="p-2">CID</th>
-              <th className="p-2">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {teamMembers.map((member, index) => (
-              <tr
-                key={index}
-                className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
-              >
-                <td className="p-2">{index + 1}</td>
-                <td className="p-2">
-                  {new Date(member.createdAt).toLocaleDateString()}
-                </td>
-                <td className="p-2">{member.username}</td>
-                <td className="p-2">{`${member.firstName} ${member.lastName}`}</td>
-                <td className="p-2">{member.phone}</td>
-                <td className="p-2">{member.cid}</td>
-                <td className="p-2">{member.status}</td>
+        <div className="overflow-x-auto max-sm:w-screen"> {/* Wrapper for horizontal scrolling */}
+          <table className="w-full text-left border-collapse"> {/* Ensure table has a minimum width */}
+            <thead>
+              <tr className="bg-gray-100 border-b">
+                <th className="p-2">No</th>
+                <th className="p-2">Reg Date</th>
+                <th className="p-2">Username</th>
+                <th className="p-2">Name</th>
+                <th className="p-2">Mobile Number</th>
+                <th className="p-2">CID</th>
+                <th className="p-2">Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {teamMembers.map((member, index) => (
+                <tr
+                  key={index}
+                  className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
+                >
+                  <td className="p-2">{index + 1}</td>
+                  <td className="p-2">
+                    {new Date(member.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="p-2">{member.username}</td>
+                  <td className="p-2">{`${member.firstName} ${member.lastName}`}</td>
+                  <td className="p-2">{member.phone}</td>
+                  <td className="p-2">{member.cid}</td>
+                  <td className="p-2">{member.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

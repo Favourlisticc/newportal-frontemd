@@ -28,7 +28,7 @@ const RealtorSidebar = ({ isSidebarOpen, closeSidebar }) => {
 
   return (
     <div
-      className={`fixed top-0 left-0 w-64 h-screen bg-[#002657] text-white flex flex-col overflow-y-auto shadow-xl pb-10 transform transition-transform duration-300 ease-in-out ${
+      className={`fixed z-[999] top-0 left-0 w-64 h-screen bg-[#002657] text-white flex flex-col overflow-y-auto shadow-xl pb-10 transform transition-transform duration-300 ease-in-out ${
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       } md:translate-x-0`}
     >
@@ -101,7 +101,7 @@ const RealtorSidebar = ({ isSidebarOpen, closeSidebar }) => {
               onClick={() => toggleMenu('fundAccount')}
             >
               <FaMoneyCheckAlt className="h-6 w-6 mr-3" />
-              Fund Account
+              Account Payment
               <FaChevronRight className={`ml-auto transition-transform ${openMenus.fundAccount ? 'rotate-90' : ''}`} />
             </div>
             {openMenus.fundAccount && (
@@ -114,7 +114,7 @@ const RealtorSidebar = ({ isSidebarOpen, closeSidebar }) => {
                     }
                     onClick={closeSidebar}
                   >
-                    Fund Now
+                    Upload Payment 
                   </NavLink>
                 </li>
                 <li>
@@ -125,7 +125,7 @@ const RealtorSidebar = ({ isSidebarOpen, closeSidebar }) => {
                     }
                     onClick={closeSidebar}
                   >
-                    Funding History
+                    Payment History
                   </NavLink>
                 </li>
               </ul>

@@ -8,7 +8,7 @@ const SupportPage = () => {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="p-6 bg-white rounded-lg shadow-md"
+      className="p-6 bg-white rounded-lg shadow-md m-3"
     >
       <h2 className="text-2xl font-semibold mb-6">Support</h2>
       <div className="space-y-4">

@@ -1,10 +1,10 @@
-import { FiLogOut } from "react-icons/fi";
+import { FiLogOut, FiMenu } from "react-icons/fi";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 
-const Navbar = () => {
+const Navbar = ({ onToggleSidebar }) => {
   const [user, setUser] = useState(null);
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedUser = localStorage.getItem("Clientuser");
@@ -22,6 +22,14 @@ const Navbar = () => {
   return (
     <header className="bg-[#002657] shadow-md">
       <div className="flex items-center justify-between px-6 py-4">
+        {/* Toggle Button for Mobile */}
+        <button
+          onClick={onToggleSidebar}
+          className="text-white hover:text-[#E5B305] transition lg:hidden"
+        >
+          <FiMenu className="w-6 h-6" />
+        </button>
+
         {/* User Info */}
         {user && (
           <div className="flex items-center space-x-3">

@@ -8,6 +8,7 @@ const Navbar = ({ toggleSidebar }) => {
 
   useEffect(() => {
     const storedData = localStorage.getItem("realtorData");
+    
     if (storedData) {
       const user = JSON.parse(storedData);
       setUserData(user);
@@ -34,6 +35,8 @@ const Navbar = ({ toggleSidebar }) => {
     }
   }, []);
 
+  console.log(userData)
+
   const handleLogout = () => {
     localStorage.removeItem("realtorData");
     localStorage.removeItem("realtorJwt");
@@ -55,9 +58,9 @@ const Navbar = ({ toggleSidebar }) => {
 
         {/* User Info Section */}
         <div className="flex items-center space-x-4">
-          {userData.profileimage ? (
+          {userData.profileImage ? (
             <img
-              src={userData.profileimage}
+              src={userData.profileImage}
               alt="Profile"
               className="w-10 h-10 rounded-full border-2 border-[#002657]"
             />

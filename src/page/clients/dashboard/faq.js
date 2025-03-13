@@ -23,7 +23,7 @@ export default function FAQPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gray-100 p-3">
       <div className="w-full lg:w-3/4 mx-auto p-6 max-sm:p-0">
         <h1 className="text-2xl font-bold mb-6">All FAQ</h1>
         <div className="space-y-4">

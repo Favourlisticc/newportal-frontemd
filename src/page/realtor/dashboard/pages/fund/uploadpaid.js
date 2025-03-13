@@ -74,7 +74,7 @@ const FundNowPage = () => {
     <div className="min-h-screen bg-gray-100 flex flex-col items-center">
       <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg mt-10 p-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-          <span className="mr-2 text-green-600">✈</span> Fund Now
+          <span className="mr-2 text-green-600">🧾</span> Upload Proof of Payment
         </h1>
 
         <div className="bg-gray-50 p-4 border rounded-lg mb-6">
@@ -83,7 +83,7 @@ const FundNowPage = () => {
 
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-gray-700 mb-2">Proof of Payment</label>
+            <label className="block text-gray-700 mb-2 text-left">Proof of Payment</label>
             <div className="flex items-center">
               <File className="text-gray-500 mr-2" />
               <input
@@ -97,7 +97,7 @@ const FundNowPage = () => {
           </div>
 
           <div>
-            <label className="block text-gray-700 mb-2">Date of Payment</label>
+            <label className="block text-gray-700 mb-2 text-left ">Date of Payment</label>
             <div className="flex items-center">
               <Calendar className="text-gray-500 mr-2" />
               <input
@@ -111,7 +111,7 @@ const FundNowPage = () => {
           </div>
 
           <div>
-            <label className="block text-gray-700 mb-2">Amount To Fund</label>
+            <label className="block text-gray-700 mb-2 text-left">Amount To Fund</label>
             <div className="flex items-center">
               <DollarSign className="text-gray-500 mr-2" />
               <input

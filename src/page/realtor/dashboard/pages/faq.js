@@ -23,11 +23,11 @@ export default function FAQPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gray-100 m-4">
       <div className="w-full lg:w-3/4 mx-auto p-6 max-sm:p-0">
         <h1 className="text-2xl font-bold mb-6">All FAQ</h1>
-        <div className="space-y-4">
-          {faqs.map((faq, index) => (
+        <div className="space-y-4 text-left">
+          {faqs.map((faq, index) => ( 
             <div
               key={faq._id} // Assuming your FAQ model has an _id field
               className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 cursor-pointer"

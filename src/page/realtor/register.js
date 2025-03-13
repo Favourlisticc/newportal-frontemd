@@ -311,13 +311,13 @@ const RegisterForm = () => {
                   } else {
                     countdownElement.textContent = `Resend code in ${remainingTime} seconds`;
                   }
-                }, 1000);
+                }, 2000);
               }
             });
           } else {
             countdownElement.textContent = `Resend code in ${remainingTime} seconds`;
           }
-        }, 1000);
+        }, 2000);
         
         // Cleanup interval on close
         Swal.getPopup().addEventListener('swalClose', () => {

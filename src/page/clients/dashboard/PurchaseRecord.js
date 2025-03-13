@@ -31,7 +31,7 @@ const PurchaseRecord = () => {
   }, [activeTab, searchQuery]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-8">
       {/* Tabs */}
       <div className="flex space-x-4 mb-6">
         <button
@@ -71,7 +71,7 @@ const PurchaseRecord = () => {
         <input
           type="text"
           placeholder="Search by property name or amount..."
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full px-4 max-sm:w-72 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -84,7 +84,7 @@ const PurchaseRecord = () => {
             <TailSpin color="#6366f1" height={40} width={40} />
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto w-screen">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>

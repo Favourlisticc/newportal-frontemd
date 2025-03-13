@@ -50,34 +50,34 @@ const ViewClients = () => {
   };
 
   return (
-    <div className="flex">
+    <div className="flex max-sm:w-screen">
       {/* Main Content */}
-      <div className="flex-1 bg-gray-100 p-6">
+      <div className=" bg-gray-100 p-4 md:p-6">
         <header className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-700">View Clients</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-700">View Clients</h1>
           <div className="text-sm text-gray-500">/ Dashboard</div>
         </header>
         <div className="bg-white shadow-md rounded-lg p-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">View Clients</h2>
+          <div className="flex flex-col md:flex-row justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold mb-4 md:mb-0">View Clients</h2>
             <input
               type="text"
               placeholder="Search"
-              className="border rounded p-2 text-sm w-64"
+              className="border rounded p-2 text-sm w-full md:w-64"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="flex space-x-4 mb-4">
+          <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-4">
             <input
               type="date"
-              className="border rounded p-2 text-sm"
+              className="border rounded p-2 text-sm w-full md:w-auto"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             />
             <input
               type="date"
-              className="border rounded p-2 text-sm"
+              className="border rounded p-2 text-sm w-full md:w-auto"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
@@ -87,82 +87,44 @@ const ViewClients = () => {
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
             </div>
           ) : (
-            <table className="min-w-full border-collapse border border-gray-200 text-left text-sm text-gray-700">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="border p-2">No</th>
-                  <th className="border p-2">First Name</th>
-                  <th className="border p-2">Last Name</th>
-                  <th className="border p-2">Username</th>
-                  <th className="border p-2">Email</th>
-                  <th className="border p-2">Phone</th>
-                  <th className="border p-2">Date of Birth</th>
-                  <th className="border p-2">Gender</th>
-                  <th className="border p-2">Passport Photo</th>
-                  <th className="border p-2">Street</th>
-                  <th className="border p-2">City</th>
-                  <th className="border p-2">State</th>
-                  <th className="border p-2">Country</th>
-                  <th className="border p-2">Zip Code</th>
-                  <th className="border p-2">Next of Kin Name</th>
-                  <th className="border p-2">Next of Kin Relationship</th>
-                  <th className="border p-2">Next of Kin Email</th>
-                  <th className="border p-2">Next of Kin Phone</th>
-                  <th className="border p-2">Employer Name</th>
-                  <th className="border p-2">Employer Address</th>
-                  <th className="border p-2">Employer Email</th>
-                  <th className="border p-2">Employer Phone</th>
-                  <th className="border p-2">Upline Name</th>
-                  <th className="border p-2">Upline Phone</th>
-                  <th className="border p-2">Upline Email</th>
-                  <th className="border p-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {clients.map((client, index) => (
-                  <tr key={client._id} className="odd:bg-white even:bg-gray-50">
-                    <td className="border p-2">{index + 1}</td>
-                    <td className="border p-2">{client.firstName}</td>
-                    <td className="border p-2">{client.lastName}</td>
-                    <td className="border p-2">{client.username}</td>
-                    <td className="border p-2">{client.email}</td>
-                    <td className="border p-2">{client.phone}</td>
-                    <td className="border p-2">{new Date(client.dateOfBirth).toLocaleDateString()}</td>
-                    <td className="border p-2">{client.gender}</td>
-                    <td className="border p-2">
-                      <img src={client.passportPhoto} alt="Passport" className="w-10 h-10 rounded-full" />
-                    </td>
-                    <td className="border p-2">{client.address?.street}</td>
-                    <td className="border p-2">{client.address?.city}</td>
-                    <td className="border p-2">{client.address?.state}</td>
-                    <td className="border p-2">{client.address?.country}</td>
-                    <td className="border p-2">{client.address?.zipCode}</td>
-                    <td className="border p-2">{client.nextOfKin?.name}</td>
-                    <td className="border p-2">{client.nextOfKin?.relationship}</td>
-                    <td className="border p-2">{client.nextOfKin?.email}</td>
-                    <td className="border p-2">{client.nextOfKin?.phone}</td>
-                    <td className="border p-2">{client.employer?.name}</td>
-                    <td className="border p-2">{client.employer?.address}</td>
-                    <td className="border p-2">{client.employer?.email}</td>
-                    <td className="border p-2">{client.employer?.phone}</td>
-                    <td className="border p-2">{client.upline?.name}</td>
-                    <td className="border p-2">{client.upline?.phone}</td>
-                    <td className="border p-2">{client.upline?.email}</td>
-                    <td className="border p-2">
-                      <button
-                        className="bg-blue-500 text-white px-4 py-2 rounded"
-                        onClick={() => handleViewPayments(client._id)}
-                      >
-                        View Payments
-                      </button>
-                    </td>
+            <div className="overflow-x-auto max-sm:w-screen"> {/* Wrapper for horizontal scrolling */}
+              <table className="min-w-full border-collapse border border-gray-200 text-left text-sm text-gray-700">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="border p-2">No</th>
+                    <th className="border p-2">First Name</th>
+                    <th className="border p-2">Last Name</th>
+                    <th className="border p-2">Username</th>
+                    <th className="border p-2">Email</th>
+                    <th className="border p-2">Phone</th>
+                    <th className="border p-2">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {clients.map((client, index) => (
+                    <tr key={client._id} className="odd:bg-white even:bg-gray-50">
+                      <td className="border p-2">{index + 1}</td>
+                      <td className="border p-2">{client.firstName}</td>
+                      <td className="border p-2">{client.lastName}</td>
+                      <td className="border p-2">{client.username}</td>
+                      <td className="border p-2">{client.email}</td>
+                      <td className="border p-2">{client.phone}</td>
+                      <td className="border p-2">
+                        <button
+                          className="bg-blue-500 text-white px-4 py-2 rounded"
+                          onClick={() => handleViewPayments(client._id)}
+                        >
+                          View Payments
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
-          <div className="mt-4 flex justify-between items-center">
-            <span className="text-sm text-gray-500">
+          <div className="mt-4 flex flex-col md:flex-row justify-between items-center">
+            <span className="text-sm text-gray-500 mb-4 md:mb-0">
               Showing 1 to {clients.length} of {clients.length} entries
             </span>
             <div className="flex space-x-2">
@@ -178,29 +140,31 @@ const ViewClients = () => {
 
       {/* Modal for View Payments */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg w-1/2">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4">
+          <div className="bg-white p-4 md:p-6 rounded-lg w-full md:w-1/2 max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">Purchase Details</h2>
-            <table className="min-w-full border-collapse border border-gray-200 text-left text-sm text-gray-700">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="border p-2">Property Name</th>
-                  <th className="border p-2">Amount</th>
-                  <th className="border p-2">Payment Method</th>
-                  <th className="border p-2">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {purchaseDetails.map((purchase) => (
-                  <tr key={purchase._id} className="odd:bg-white even:bg-gray-50">
-                    <td className="border p-2">{purchase.propertyName}</td>
-                    <td className="border p-2">{purchase.amount}</td>
-                    <td className="border p-2">{purchase.paymentMethod}</td>
-                    <td className="border p-2">{purchase.status}</td>
+            <div className="overflow-x-auto"> {/* Wrapper for horizontal scrolling */}
+              <table className="min-w-full border-collapse border border-gray-200 text-left text-sm text-gray-700">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="border p-2">Property Name</th>
+                    <th className="border p-2">Amount</th>
+                    <th className="border p-2">Payment Method</th>
+                    <th className="border p-2">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {purchaseDetails.map((purchase) => (
+                    <tr key={purchase._id} className="odd:bg-white even:bg-gray-50">
+                      <td className="border p-2">{purchase.propertyName}</td>
+                      <td className="border p-2">{purchase.amount}</td>
+                      <td className="border p-2">{purchase.paymentMethod}</td>
+                      <td className="border p-2">{purchase.status}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             <button
               className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
               onClick={() => setIsModalOpen(false)}

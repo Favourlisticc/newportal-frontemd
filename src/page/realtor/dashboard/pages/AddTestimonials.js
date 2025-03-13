@@ -62,7 +62,7 @@ const AddTestimonials = () => {
       <h2 className="text-2xl font-semibold mb-6">Add Testimonials</h2>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Testimonial Title</label>
+          <label className="block text-sm font-medium mb-1 text-left">Property Purchased</label>
           <input
             type="text"
             {...register("title", { required: "Title is required" })}
@@ -72,7 +72,7 @@ const AddTestimonials = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Testimonial Content</label>
+          <label className="block text-sm font-medium mb-1 text-left">Testimonial Content</label>
           <textarea
             {...register("content", { required: "Content is required" })}
             className="w-full p-2 border rounded-lg"
