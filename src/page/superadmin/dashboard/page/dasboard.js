@@ -113,7 +113,7 @@ const AdminDashboard = () => {
         />
         <StatCard
           icon={<FaFileContract />}
-          title="TOTAL PROPERTIES BOUGHT"
+          title="TOTAL PROPERTIES SOLD"
           value={stats.totalPropertiesBought || 0}
           color="bg-gradient-to-r from-purple-500 to-purple-600"
         />

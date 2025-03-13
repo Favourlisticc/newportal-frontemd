@@ -76,9 +76,52 @@ const ClientTable = () => {
   };
 
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(clients);
+    // Flatten the clients array to include all nested fields
+    const flattenedClients = clients.map(client => ({
+      // Top-level fields
+      _id: client._id,
+      firstName: client.firstName,
+      lastName: client.lastName,
+      username: client.username,
+      email: client.email,
+      phone: client.phone,
+      dateOfBirth: new Date(client.dateOfBirth).toLocaleDateString(),
+      gender: client.gender,
+      passportPhoto: client.passportPhoto,
+      createdAt: new Date(client.createdAt).toLocaleString(),
+      updatedAt: new Date(client.updatedAt).toLocaleString(),
+
+      // Address fields
+      addressStreet: client.address?.street || 'N/A',
+      addressCity: client.address?.city || 'N/A',
+      addressState: client.address?.state || 'N/A',
+      addressCountry: client.address?.country || 'N/A',
+      addressZipCode: client.address?.zipCode || 'N/A',
+
+      // Next of Kin fields
+      nextOfKinName: client.nextOfKin?.name || 'N/A',
+      nextOfKinRelationship: client.nextOfKin?.relationship || 'N/A',
+      nextOfKinEmail: client.nextOfKin?.email || 'N/A',
+      nextOfKinPhone: client.nextOfKin?.phone || 'N/A',
+
+      // Work fields
+      workName: client.work?.name || 'N/A',
+      workAddress: client.work?.address || 'N/A',
+
+      // Upline fields
+      uplineName: client.upline?.name || 'N/A',
+      uplinePhone: client.upline?.phone || 'N/A',
+      uplineEmail: client.upline?.email || 'N/A',
+    }));
+
+    // Create a worksheet from the flattened data
+    const worksheet = XLSX.utils.json_to_sheet(flattenedClients);
+
+    // Create a workbook and append the worksheet
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Clients");
+
+    // Export the workbook to an Excel file
     XLSX.writeFile(workbook, "Clients.xlsx");
   };
 
@@ -173,20 +216,121 @@ const ClientTable = () => {
 
       {/* View Modal */}
       {selectedClient && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg max-w-2xl w-full">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center pt-10">
+          <div className="bg-white p-6 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl mb-4">Client Details</h2>
             {modalLoading ? (
               <div className="text-center">Loading...</div>
             ) : (
-              <div className="grid grid-cols-2 gap-4">
-                {Object.entries(selectedClient).map(([key, value]) => (
-                  key !== '_id' && (
-                    <div key={key}>
-                      <strong>{key}:</strong> {JSON.stringify(value)}
+              <div className="space-y-4">
+                {/* Basic Details */}
+                <div>
+                  <strong>First Name:</strong> {selectedClient.firstName}
+                </div>
+                <div>
+                  <strong>Last Name:</strong> {selectedClient.lastName}
+                </div>
+                <div>
+                  <strong>Username:</strong> {selectedClient.username}
+                </div>
+                <div>
+                  <strong>Email:</strong> {selectedClient.email}
+                </div>
+                <div>
+                  <strong>Phone:</strong> {selectedClient.phone}
+                </div>
+                <div>
+                  <strong>Date of Birth:</strong> {new Date(selectedClient.dateOfBirth).toLocaleDateString()}
+                </div>
+                <div>
+                  <strong>Gender:</strong> {selectedClient.gender}
+                </div>
+                <div>
+                  <strong>Passport Photo:</strong>
+                  <img
+                    src={selectedClient.passportPhoto}
+                    alt="Passport"
+                    className="w-16 h-16 mt-2 rounded-full"
+                  />
+                </div>
+
+                {/* Address */}
+                <div className="mt-4">
+                  <strong>Address:</strong>
+                  <div className="pl-4">
+                    <div>
+                      <strong>Street:</strong> {selectedClient.address?.street || 'N/A'}
                     </div>
-                  )
-                ))}
+                    <div>
+                      <strong>City:</strong> {selectedClient.address?.city || 'N/A'}
+                    </div>
+                    <div>
+                      <strong>State:</strong> {selectedClient.address?.state || 'N/A'}
+                    </div>
+                    <div>
+                      <strong>Country:</strong> {selectedClient.address?.country || 'N/A'}
+                    </div>
+                    <div>
+                      <strong>Zip Code:</strong> {selectedClient.address?.zipCode || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Next of Kin */}
+                <div className="mt-4">
+                  <strong>Next of Kin:</strong>
+                  <div className="pl-4">
+                    <div>
+                      <strong>Name:</strong> {selectedClient.nextOfKin?.name || 'N/A'}
+                    </div>
+                    <div>
+                      <strong>Relationship:</strong> {selectedClient.nextOfKin?.relationship || 'N/A'}
+                    </div>
+                    <div>
+                      <strong>Email:</strong> {selectedClient.nextOfKin?.email || 'N/A'}
+                    </div>
+                    <div>
+                      <strong>Phone:</strong> {selectedClient.nextOfKin?.phone || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Work */}
+                <div className="mt-4">
+                  <strong>Work:</strong>
+                  <div className="pl-4">
+                    <div>
+                      <strong>Name:</strong> {selectedClient.work?.name || 'N/A'}
+                    </div>
+                    <div>
+                      <strong>Address:</strong> {selectedClient.work?.address || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Upline */}
+                <div className="mt-4">
+                  <strong>Upline:</strong>
+                  <div className="pl-4">
+                    <div>
+                      <strong>Name:</strong> {selectedClient.upline?.name || 'N/A'}
+                    </div>
+                    <div>
+                      <strong>Phone:</strong> {selectedClient.upline?.phone || 'N/A'}
+                    </div>
+                    <div>
+                      <strong>Email:</strong> {selectedClient.upline?.email || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Timestamps */}
+                <div className="mt-4">
+                  <strong>Created At:</strong> {new Date(selectedClient.createdAt).toLocaleString()}
+                </div>
+                <div>
+                  <strong>Updated At:</strong> {new Date(selectedClient.updatedAt).toLocaleString()}
+                </div>
               </div>
             )}
             <button

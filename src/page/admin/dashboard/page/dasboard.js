@@ -14,11 +14,15 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [statsRes, earningsRes] = await Promise.all([
-          axios.get('https://newportal-backend.onrender.com/admin/dashboard-stats'),
+        const [statsRes] = await Promise.all([
+          axios.get('http://localhost:3005/admin/admin-dashboard-stats'),
         ]);
-        setStats(statsRes.data);
-        setEarnings(earningsRes.data);
+        console.log('API Response:', statsRes.data); // Debug the response
+        setStats({
+          totalRealtors: statsRes.data.totalRealtors || 0,
+          totalWithdrawn: statsRes.data.totalWithdrawn || 0,
+          pendingWithdrawals: statsRes.data.pendingWithdrawals || 0
+        });
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -45,9 +49,11 @@ const AdminDashboard = () => {
             </div>
           ) : (
             <p className="text-lg md:text-2xl font-bold text-white">
-              {title.includes('REALTORS') 
-                ? value.toLocaleString() // Number format for realtors
-                : value.toLocaleString('en-NG', { style: 'currency', currency: 'NGN' })}
+              {value !== undefined && value !== null
+                ? title.includes('REALTORS')
+                  ? value.toLocaleString() // Number format for realtors
+                  : value.toLocaleString('en-NG', { style: 'currency', currency: 'NGN' })
+                : 'N/A'} {/* Fallback for undefined/null values */}
             </p>
           )}
         </div>
