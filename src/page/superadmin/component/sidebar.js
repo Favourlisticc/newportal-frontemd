@@ -71,7 +71,7 @@ const AdminSidebar = ({ bgColor, textColor }) => {
       subItems: [
         { name: 'Pending Sales', path: '/superadmin-dashboard/pending-sales' },
         { name: 'Approved Sales', path: '/superadmin-dashboard/approved-sales' },
-        { name: 'Unbalanced Sales', path: '/superadmin-dashboard/unbalanced-sales' },
+        { name: 'Incomplete Payment', path: '/superadmin-dashboard/unbalanced-sales' },
         { name: 'Rejected Sales', path: '/superadmin-dashboard/rejected-sales' }
       ]
     },

@@ -196,9 +196,9 @@ export default function FundingHistory() {
 
       {/* Modal */}
       {selectedImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[999] overflow-x-auto">
           <div className="bg-white p-4 rounded-lg">
-            <img src={selectedImage} alt="Proof" className="max-w-full max-h-screen" />
+            <img src={selectedImage} alt="Proof" className=" h-96" />
             <button
               onClick={() => setSelectedImage(null)}
               className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"

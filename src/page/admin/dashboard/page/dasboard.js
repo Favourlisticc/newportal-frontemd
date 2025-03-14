@@ -15,7 +15,7 @@ const AdminDashboard = () => {
     const fetchData = async () => {
       try {
         const [statsRes] = await Promise.all([
-          axios.get('http://localhost:3005/admin/admin-dashboard-stats'),
+          axios.get('https://newportal-backend.onrender.com/admin/admin-dashboard-stats'),
         ]);
         console.log('API Response:', statsRes.data); // Debug the response
         setStats({

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FaUsers, FaStar, FaClock, FaFileContract } from 'react-icons/fa';
 import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import TodaysBirthdays from './birthday/TodaysBirthdays';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -124,6 +125,8 @@ const AdminDashboard = () => {
           color="bg-gradient-to-r from-red-500 to-red-600"
         />
       </div>
+
+      <TodaysBirthdays/>
 
       {/* Chart Section */}
       <div className="bg-white rounded-xl shadow-lg overflow-hidden p-4 md:p-6">

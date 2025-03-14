@@ -454,7 +454,7 @@ const SignupForm = () => {
       }).then(async (result) => {
         if (result.isConfirmed) {
           // Send data to the backend
-          const response = await axios.post('http://localhost:3005/client/signup', userData);
+          const response = await axios.post('https://newportal-backend.onrender.com/client/signup', userData);
 
           // Handle backend response
           const { token, user } = response.data;
