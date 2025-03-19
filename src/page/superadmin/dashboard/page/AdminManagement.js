@@ -152,7 +152,7 @@ const AdminManagement = () => {
                     onClick={() => setAdminViewType('superadmin')}
                   >
                     <FaUserShield className="w-4 h-4 mr-2" />
-                    Super Admins
+                    View Super Admins
                   </button>
                 </li>
                 <li className="mr-2">
@@ -165,7 +165,7 @@ const AdminManagement = () => {
                     onClick={() => setAdminViewType('admin')}
                   >
                     <FaUserCog className="w-4 h-4 mr-2" />
-                    Admins
+                    View Admins
                   </button>
                 </li>
               </ul>
@@ -229,7 +229,7 @@ const AdminManagement = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                  <label htmlFor="firstName" className="block text-sm text-left font-medium text-gray-700 mb-1">First Name</label>
                   <input
                     type="text"
                     id="firstName"
@@ -242,7 +242,7 @@ const AdminManagement = () => {
                 </div>
                 
                 <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                  <label htmlFor="lastName" className="block text-left text-sm font-medium text-gray-700 mb-1">Last Name</label>
                   <input
                     type="text"
                     id="lastName"
@@ -256,7 +256,7 @@ const AdminManagement = () => {
               </div>
               
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label htmlFor="email" className="block text-left text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input
                   type="email"
                   id="email"
@@ -269,7 +269,7 @@ const AdminManagement = () => {
               </div>
               
               <div>
-                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                <label htmlFor="phoneNumber" className="block text-left text-sm font-medium text-gray-700 mb-1">Phone Number</label>
                 <input
                   type="tel"
                   id="phoneNumber"
@@ -282,7 +282,7 @@ const AdminManagement = () => {
               </div>
               
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <label htmlFor="password" className="block text-left text-sm font-medium text-gray-700 mb-1">Password</label>
                 <input
                   type="password"
                   id="password"
@@ -295,7 +295,7 @@ const AdminManagement = () => {
               </div>
               
               <div>
-                <label htmlFor="adminType" className="block text-sm font-medium text-gray-700 mb-1">Admin Type</label>
+                <label htmlFor="adminType" className="block text-left text-sm font-medium text-gray-700 mb-1">Admin Type</label>
                 <select
                   id="adminType"
                   name="adminType"
