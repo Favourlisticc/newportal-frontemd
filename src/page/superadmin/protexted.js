@@ -8,7 +8,7 @@ const ProtectedRoute = () => {
   console.log(jwt)
 
   if (!jwt) {
-    return <Navigate to="/signup" />;
+    return <Navigate to="/superadmin/login" />;
   }
 
   return (
