@@ -57,7 +57,7 @@ const LoginForm = () => {
 
   setLoading(true);
   try {
-    const response = await fetch('http://localhost:3005/auth/client/login', {
+    const response = await fetch('https://newportal-backend.onrender.com/auth/client/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -117,7 +117,7 @@ const handleForgotPassword = async () => {
     preConfirm: async (email) => {
       try {
         // Check if email exists in the backend
-        const response = await fetch('http://localhost:3005/client/auth/check-email', {
+        const response = await fetch('https://newportal-backend.onrender.com/client/auth/check-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email }),
@@ -130,7 +130,7 @@ const handleForgotPassword = async () => {
         }
 
         // Send OTP
-        const otpResponse = await fetch('http://localhost:3005/client/auth/send-otp', {
+        const otpResponse = await fetch('https://newportal-backend.onrender.com/client/auth/send-otp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email }),
@@ -161,7 +161,7 @@ const handleForgotPassword = async () => {
       showLoaderOnConfirm: true,
       preConfirm: async (otp) => {
         try {
-          const response = await fetch('http://localhost:3005/client/auth/verify-otp', {
+          const response = await fetch('https://newportal-backend.onrender.com/client/auth/verify-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, otp }),
@@ -249,7 +249,7 @@ const handleForgotPassword = async () => {
           }
 
           try {
-            const response = await fetch('http://localhost:3005/client/auth/change-password', {
+            const response = await fetch('https://newportal-backend.onrender.com/client/auth/change-password', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ email, newPassword }),
@@ -262,7 +262,7 @@ const handleForgotPassword = async () => {
             }
 
             // Send confirmation email
-            await fetch('http://localhost:3005/client/auth/send-confirmation-email', {
+            await fetch('https://newportal-backend.onrender.com/client/auth/send-confirmation-email', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ email }),

@@ -31,7 +31,7 @@ export default function ActivationEarnings() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3005/admin/view-commissions');
+      const response = await fetch('https://newportal-backend.onrender.com/admin/view-commissions');
       const result = await response.json();
       setData(result);
     } catch (error) {

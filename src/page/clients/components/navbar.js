@@ -33,7 +33,7 @@ const Navbar = ({ onToggleSidebar }) => {
         today.getDate() === userDob.getDate()
       ) {
         axios
-          .get(`http://localhost:3005/client/birthday-message?userId=${user._id}`)
+          .get(`https://newportal-backend.onrender.com/client/birthday-message?userId=${user._id}`)
           .then((response) => {
             if (response.data.message) {
               setBirthdayMessage(response.data.message);

@@ -17,7 +17,7 @@ const TodaysBirthdays = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:3005/admin/todays-birthdays');
+        const response = await axios.get('https://newportal-backend.onrender.com/admin/todays-birthdays');
         setBirthdays(response.data);
       } catch (error) {
         toast.error("Failed to load birthdays");
@@ -66,7 +66,7 @@ const TodaysBirthdays = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3005/admin/send-birthday-email', {
+      const response = await axios.post('https://newportal-backend.onrender.com/admin/send-birthday-email', {
         email: selectedUser.email,
         message: message
       });

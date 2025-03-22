@@ -26,7 +26,7 @@ const PendingSalesHistory = () => {
   const handleStatusChange = async (id, newStatus) => {
     setActionLoading(prev => ({ ...prev, [id]: true }));
     try {
-      await axios.patch(`http://localhost:3005/admin/purchases/${id}/status`, { status: newStatus });
+      await axios.patch(`https://newportal-backend.onrender.com/admin/purchases/${id}/status`, { status: newStatus });
       toast.success(`Purchase ${newStatus} successfully!`);
       await fetchPendingPurchases();
     } catch (error) {

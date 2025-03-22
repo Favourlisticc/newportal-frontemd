@@ -27,7 +27,7 @@ const AddTestimonials = () => {
         realtorEmail: realtorData.email,
       };
 
-      const response = await fetch('http://localhost:3005/realtor/testimonials/submit', {
+      const response = await fetch('https://newportal-backend.onrender.com/realtor/testimonials/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

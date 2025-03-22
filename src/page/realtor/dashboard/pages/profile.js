@@ -120,7 +120,7 @@ const ProfilePage = () => {
 
     try {
       const response = await axios.put(
-        `http://localhost:3005/realtor/edit-profile`,
+        `https://newportal-backend.onrender.com/realtor/edit-profile`,
         {
           userId: user._id,
           ...user,

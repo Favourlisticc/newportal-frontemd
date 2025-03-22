@@ -102,7 +102,7 @@ const RealtorLogin = () => {
       preConfirm: async (email) => {
         try {
           // Check if email exists in the backend
-          const response = await fetch('http://localhost:3005/realtor/auth/check-email', {
+          const response = await fetch('https://newportal-backend.onrender.com/realtor/auth/check-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email }),
@@ -115,7 +115,7 @@ const RealtorLogin = () => {
           }
   
           // Send OTP
-          const otpResponse = await fetch('http://localhost:3005/realtor/auth/send-otp', {
+          const otpResponse = await fetch('https://newportal-backend.onrender.com/realtor/auth/send-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email }),
@@ -147,7 +147,7 @@ const RealtorLogin = () => {
         allowOutsideClick: () => !Swal.isLoading(),
         preConfirm: async (otp) => {
           try {
-            const response = await fetch('http://localhost:3005/realtor/auth/verify-otp', {
+            const response = await fetch('https://newportal-backend.onrender.com/realtor/auth/verify-otp', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ email, otp }),
@@ -207,7 +207,7 @@ const RealtorLogin = () => {
             }
             
             try {
-              const response = await fetch('http://localhost:3005/realtor/auth/change-password', {
+              const response = await fetch('https://newportal-backend.onrender.com/realtor/auth/change-password', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, newPassword }),
@@ -220,7 +220,7 @@ const RealtorLogin = () => {
               }
     
               // Send confirmation email
-              await fetch('http://localhost:3005/realtor/auth/send-confirmation-email', {
+              await fetch('https://newportal-backend.onrender.com/realtor/auth/send-confirmation-email', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email }),
