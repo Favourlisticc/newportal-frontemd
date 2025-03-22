@@ -35,35 +35,7 @@ function DataUploadPage() {
     ctx.stroke();
   };
 
-  const clearSignature = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    setSignature(false);
-  };
 
-  const signContract = () => {
-    const canvas = canvasRef.current;
-    if (canvas.toDataURL() !== 'data:,') {
-      setSignature(true);
-    } else {
-      alert('Please sign before submitting.');
-    }
-  };
-
-  // Adjust canvas size for mobile
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const setCanvasSize = () => {
-      const maxWidth = window.innerWidth * 0.8; // 80% of screen width
-      canvas.width = Math.min(400, maxWidth); // Limit to 400px or screen width
-      canvas.height = 200;
-    };
-
-    setCanvasSize();
-    window.addEventListener('resize', setCanvasSize);
-    return () => window.removeEventListener('resize', setCanvasSize);
-  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 py-6 max-sm:py-3 flex flex-col justify-center sm:py-12">
@@ -93,34 +65,7 @@ function DataUploadPage() {
             </ul>
           </div>
 
-          {/* Digital Signature Section */}
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Digital Signature</h2>
-            <canvas
-              ref={canvasRef}
-              width="400"
-              height="200"
-              onMouseDown={startDrawing}
-              onMouseUp={stopDrawing}
-              onMouseLeave={stopDrawing}
-              className="w-full max-w-full border border-gray-300 mb-2"
-            ></canvas>
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-              <button
-                onClick={clearSignature}
-                className="w-full sm:w-auto px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 focus:outline-none"
-              >
-                Clear
-              </button>
-              <button
-                onClick={signContract}
-                className="w-full sm:w-auto px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 focus:outline-none"
-              >
-                Sign Contract
-              </button>
-            </div>
-            {signature && <p className="mt-2 text-green-500">Contract signed digitally!</p>}
-          </div>
+         
         </div>
       </div>
     </div>

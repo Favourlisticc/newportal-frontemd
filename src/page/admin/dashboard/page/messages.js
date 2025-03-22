@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaSpinner, FaReply, FaUser, FaUserShield } from "react-icons/fa";
+import { FaSpinner, FaReply, FaUser, FaUserShield, FaSort } from "react-icons/fa";
 
 const ViewMessages = () => {
   const [tickets, setTickets] = useState([]);
@@ -10,6 +10,8 @@ const ViewMessages = () => {
   const [replyLoading, setReplyLoading] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [replyContent, setReplyContent] = useState("");
+  const [searchQuery, setSearchQuery] = useState(""); // For search functionality
+  const [sortOrder, setSortOrder] = useState("desc"); // For sorting by date
 
   useEffect(() => {
     fetchTickets();
@@ -43,11 +45,47 @@ const ViewMessages = () => {
     }
   };
 
+  // Filter tickets based on search query (username, email, or phone number)
+  const filteredTickets = tickets.filter((ticket) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      ticket.username?.toLowerCase().includes(query) ||
+      ticket.email?.toLowerCase().includes(query) ||
+      ticket.phone?.toLowerCase().includes(query)
+    );
+  });
+
+  // Sort tickets by date
+  const sortedTickets = filteredTickets.sort((a, b) => {
+    const dateA = new Date(a.createdAt);
+    const dateB = new Date(b.createdAt);
+    return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+  });
+
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6 bg-gray-100 min-h-screen max-sm:w-screen max-sm:p-3">
       <ToastContainer />
       <div className="bg-white shadow-md rounded-lg p-4">
         <h2 className="text-xl font-semibold mb-4 text-[#002657]">View Messages History</h2>
+
+        {/* Search and Sort Controls */}
+        <div className="flex flex-wrap gap-4 mb-4">
+          <input
+            type="text"
+            placeholder="Search by username, email, or phone..."
+            className="flex-1 p-2 border border-gray-300 rounded-md text-sm"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <select
+            className="p-2 border border-gray-300 rounded-md text-sm"
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+          >
+            <option value="desc">Newest First</option>
+            <option value="asc">Oldest First</option>
+          </select>
+        </div>
 
         {loading ? (
           <div className="flex justify-center items-center h-32">
@@ -59,13 +97,11 @@ const ViewMessages = () => {
               <thead>
                 <tr className="bg-[#002657] text-white">
                   <th className="border border-gray-300 px-4 py-2">No</th>
-                  <th className="border border-gray-300 px-4 py-2">
-            firstName
-                  </th>
-                  <th className="border border-gray-300 px-4 py-2">Second Name</th>
+                  <th className="border border-gray-300 px-4 py-2">First Name</th>
+                  <th className="border border-gray-300 px-4 py-2">Last Name</th>
                   <th className="border border-gray-300 px-4 py-2">Username</th>
-                  <th className="border border-gray-300 px-4 py-2">usertype</th>
-                  <th className="border border-gray-300 px-4 py-2">Phonenumber</th>
+                  <th className="border border-gray-300 px-4 py-2">User Type</th>
+                  <th className="border border-gray-300 px-4 py-2">Phone Number</th>
                   <th className="border border-gray-300 px-4 py-2">Email</th>
                   <th className="border border-gray-300 px-4 py-2">Subject</th>
                   <th className="border border-gray-300 px-4 py-2">Messages</th>
@@ -74,16 +110,15 @@ const ViewMessages = () => {
                 </tr>
               </thead>
               <tbody>
-                {tickets.map((ticket, index) => (
+                {sortedTickets.map((ticket, index) => (
                   <tr key={ticket._id} className="text-sm text-gray-700 hover:bg-gray-50">
                     <td className="border border-gray-300 px-4 py-2 text-center">{index + 1}</td>
-                    <td className="border border-gray-300 px-4 py-2">{ticket.user?.firstName || "N/A"}</td>
+                    <td className="border border-gray-300 px-4 py-2">{ticket.firstName || "N/A"}</td>
                     <td className="border border-gray-300 px-4 py-2">{ticket.lastName}</td>
                     <td className="border border-gray-300 px-4 py-2">{ticket.username || "N/A"}</td>
-                    <td className="border border-gray-300 px-4 py-2">{ticket.messages.sender}</td>
+                    <td className="border border-gray-300 px-4 py-2">{ticket?.messages.sender}</td>
                     <td className="border border-gray-300 px-4 py-2">{ticket.phone || "N/A"}</td>
                     <td className="border border-gray-300 px-4 py-2">{ticket.email || "N/A"}</td>
-                    <td className="border border-gray-300 px-4 py-2">{ticket.subject}</td>
                     <td className="border border-gray-300 px-4 py-2">{ticket.subject}</td>
                     <td className="border border-gray-300 px-4 py-2">
                       <div className="space-y-2">

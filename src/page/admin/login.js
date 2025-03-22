@@ -28,6 +28,10 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
+    useEffect(() => {
+      document.title = "Baay Realtors - Admin Login";
+    }, []);
+
   // Check if the user is already logged in
   useEffect(() => {
     const token = localStorage.getItem("Admintoken");

@@ -95,7 +95,7 @@ const ViewFAQ = () => {
   );
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4 max-sm:w-screen">
       <ToastContainer />
       <div className="w-full max-w-5xl bg-white p-6 rounded-2xl shadow-md">
         <h2 className="text-2xl font-bold text-[#002657] mb-4">View FAQ</h2>

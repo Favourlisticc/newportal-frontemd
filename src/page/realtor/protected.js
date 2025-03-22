@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './dashboard/component/navbar';
 import RealtorSidebar from './dashboard/component/sidebar';
-import { Outlet } from "react-router-dom"; // Import Outlet
+import { Outlet, Navigate } from "react-router-dom";
 
 const DashboardLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const jwt = localStorage.getItem("realtorJwt");
+
+  useEffect(() => {
+    document.title = "Baay Realtors - Realtor Portal";
+  }, []);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -15,6 +20,10 @@ const DashboardLayout = ({ children }) => {
       setIsSidebarOpen(false);
     }
   };
+
+  if (!jwt) {
+    return <Navigate to="/realtor/login" />;
+  }
 
   return (
     <div className="flex min-h-screen ">
@@ -28,7 +37,7 @@ const DashboardLayout = ({ children }) => {
 
         {/* Page Content */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
-           <Outlet />
+          <Outlet />
         </main>
       </div>
     </div>

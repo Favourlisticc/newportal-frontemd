@@ -65,7 +65,7 @@ export default function FundingHistory() {
     });
 
   return (
-    <div className="max-w-5xl mx-auto p-6 bg-white shadow rounded-lg">
+    <div className="max-w-5xl mx-auto p-6 bg-white shadow rounded-lg max-sm:w-screen">
       <ToastContainer />
       <h2 className="text-2xl font-bold mb-4">Funding History</h2>
       
@@ -99,7 +99,8 @@ export default function FundingHistory() {
       </div>
 
       {/* Table */}
-      <table className="min-w-full bg-white border mt-4">
+     <div className=' overflow-x-auto'>
+     <table className="min-w-full bg-white border mt-4">
         <thead>
           <tr className="border-b bg-gray-200">
             <th className="p-3 text-left">User</th>
@@ -193,6 +194,7 @@ export default function FundingHistory() {
           )}
         </tbody>
       </table>
+     </div>
 
       {/* Modal */}
       {selectedImage && (

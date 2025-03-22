@@ -13,17 +13,16 @@ const RealtorsList = () => {
   const [actionLoading, setActionLoading] = useState(null);
   const [search, setSearch] = useState('');
   const [sortOrder, setSortOrder] = useState('desc');
-  const [selectedrealtors, setSelectedRealtors] = useState(null);
+  const [selectedRealtor, setSelectedRealtor] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editForm, setEditForm] = useState({});
-  const [startDate, setStartDate] = useState(null); // For date filtering
-  const [endDate, setEndDate] = useState(null); // For date filtering
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   const fetchRealtors = async () => {
     try {
       setLoading(true);
-      // Adjust dates to cover the full day
       const adjustDate = (date, isEnd) => {
         if (!date) return null;
         const newDate = new Date(date);
@@ -34,10 +33,10 @@ const RealtorsList = () => {
         }
         return newDate;
       };
-  
+
       const adjustedStartDate = adjustDate(startDate, false);
       const adjustedEndDate = adjustDate(endDate, true);
-  
+
       const response = await axios.get(`https://newportal-backend.onrender.com/admin/viewrealtors`, {
         params: {
           search,
@@ -61,11 +60,11 @@ const RealtorsList = () => {
   const handleDelete = async (id) => {
     try {
       setActionLoading(id);
-      await axios.delete(`hhttps://newportal-backend.onrender.com/admin/delete/${id}`);
-      toast.success('Realtors deleted successfully');
+      await axios.delete(`https://newportal-backend.onrender.com/admin/delete/${id}`);
+      toast.success('Realtor deleted successfully');
       fetchRealtors();
     } catch (error) {
-      toast.error('Failed to delete Realtors');
+      toast.error('Failed to delete Realtor');
     } finally {
       setActionLoading(null);
     }
@@ -75,10 +74,10 @@ const RealtorsList = () => {
     try {
       setActionLoading(id);
       const response = await axios.get(`https://newportal-backend.onrender.com/admin/viewrealtors/${id}`);
-      setSelectedRealtors(response.data);
+      setSelectedRealtor(response.data);
       setIsViewModalOpen(true);
     } catch (error) {
-      toast.error('Failed to fetch Realtors details');
+      toast.error('Failed to fetch Realtor details');
     } finally {
       setActionLoading(null);
     }
@@ -91,7 +90,7 @@ const RealtorsList = () => {
       setEditForm(response.data);
       setIsEditModalOpen(true);
     } catch (error) {
-      toast.error('Failed to fetch Realtors details');
+      toast.error('Failed to fetch Realtor details');
     } finally {
       setActionLoading(null);
     }
@@ -101,19 +100,18 @@ const RealtorsList = () => {
     try {
       setActionLoading(editForm._id);
       await axios.put(`https://newportal-backend.onrender.com/admin/editrealtors/${editForm._id}`, editForm);
-      toast.success('Realtors updated successfully');
+      toast.success('Realtor updated successfully');
       setIsEditModalOpen(false);
       fetchRealtors();
     } catch (error) {
-      toast.error('Failed to update Realtors');
+      toast.error('Failed to update Realtor');
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleExport = () => {
-    // Flatten realtor data for export
-    const flattenedRealtors = selectedrealtors.map(realtor => ({
+    const flattenedRealtors = realtors.map(realtor => ({
       username: realtor.username,
       firstName: realtor.firstName,
       lastName: realtor.lastName,
@@ -137,24 +135,41 @@ const RealtorsList = () => {
       balance: realtor.balance || '',
       createdAt: new Date(realtor.createdAt).toLocaleString(),
     }));
-  
+
     const worksheet = XLSX.utils.json_to_sheet(flattenedRealtors);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Realtor');
-    XLSX.writeFile(workbook, 'realtor.xlsx');
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Realtors');
+    XLSX.writeFile(workbook, 'realtors.xlsx');
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader className="w-8 h-8 animate-spin text-[#002657]" />
-      </div>
-    );
-  }
+  // Helper function to format data for display
+  const formatDataForDisplay = (key, value) => {
+    if (value === null || value === undefined || value === '') {
+      return 'No data for this field';
+    }
+
+    // Format dates
+    if (key.toLowerCase().includes('date') || key.toLowerCase().includes('dob') || key.toLowerCase().includes('createdat')) {
+      return new Date(value).toLocaleString();
+    }
+
+    // Format upline information
+    if (key === 'upline' && typeof value === 'object') {
+      return value.name ? `${value.name} (${value.phone}, ${value.email})` : 'No upline data';
+    }
+
+    // Format arrays (e.g., referrals)
+    if (Array.isArray(value)) {
+      return value.length > 0 ? value.join(', ') : 'No data for this field';
+    }
+
+    // Default case
+    return value;
+  };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-        <div className="mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
+    <div className="p-6 max-w-7xl mx-auto max-sm:w-screen">
+      <div className="mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="relative w-full sm:w-96">
           <input
             type="text"
@@ -166,8 +181,8 @@ const RealtorsList = () => {
           <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
+        <div className="flex max-sm:flex-col items-center gap-4">
+          <div className="flex max-sm:flex-col items-center gap-2 ">
             <DatePicker
               selected={startDate}
               onChange={(date) => setStartDate(date)}
@@ -212,46 +227,60 @@ const RealtorsList = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {realtors.map((realtor) => (
-              <tr key={realtor._id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">{realtor.username}</td>
-                <td className="px-6 py-4">{`${realtor.firstName} ${realtor.lastName}`}</td>
-                <td className="px-6 py-4">{realtor.email}</td>
-                <td className="px-6 py-4">{realtor.phone}</td>
-                <td className="px-6 py-4">
-                  <div className="flex justify-center gap-2">
-                    <button
-                      onClick={() => handleView(realtor._id)}
-                      disabled={actionLoading === realtor._id}
-                      className="p-2 text-[#002657] hover:bg-[#002657] hover:text-white rounded-full transition-colors"
-                    >
-                      <Eye className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => handleEdit(realtor._id)}
-                      disabled={actionLoading === realtor._id}
-                      className="p-2 text-[#E5B305] hover:bg-[#E5B305] hover:text-white rounded-full transition-colors"
-                    >
-                      <Edit2 className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(realtor._id)}
-                      disabled={actionLoading === realtor._id}
-                      className="p-2 text-red-600 hover:bg-red-600 hover:text-white rounded-full transition-colors"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                  </div>
+            {loading ? (
+              <tr>
+                <td colSpan="5" className="text-center py-8">
+                  <Loader className="w-8 h-8 animate-spin text-[#002657] mx-auto" />
                 </td>
               </tr>
-            ))}
+            ) : realtors.length > 0 ? (
+              realtors.map((realtor) => (
+                <tr key={realtor._id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4">{realtor.username}</td>
+                  <td className="px-6 py-4">{`${realtor.firstName} ${realtor.lastName}`}</td>
+                  <td className="px-6 py-4">{realtor.email}</td>
+                  <td className="px-6 py-4">{realtor.phone}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex justify-center gap-2">
+                      <button
+                        onClick={() => handleView(realtor._id)}
+                        disabled={actionLoading === realtor._id}
+                        className="p-2 text-[#002657] hover:bg-[#002657] hover:text-white rounded-full transition-colors"
+                      >
+                        <Eye className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => handleEdit(realtor._id)}
+                        disabled={actionLoading === realtor._id}
+                        className="p-2 text-[#E5B305] hover:bg-[#E5B305] hover:text-white rounded-full transition-colors"
+                      >
+                        <Edit2 className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(realtor._id)}
+                        disabled={actionLoading === realtor._id}
+                        className="p-2 text-red-600 hover:bg-red-600 hover:text-white rounded-full transition-colors"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="text-center py-8 text-gray-500">
+                  No realtors found.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
       {/* View Modal */}
-      {isViewModalOpen && selectedrealtors && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+      {isViewModalOpen && selectedRealtor && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[999]">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
@@ -264,12 +293,14 @@ const RealtorsList = () => {
                 </button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.entries(selectedrealtors).map(([key, value]) => {
+                {Object.entries(selectedRealtor).map(([key, value]) => {
                   if (key !== '_id' && key !== '__v' && key !== 'password') {
                     return (
                       <div key={key} className="border-b border-gray-200 pb-2">
                         <p className="text-sm text-gray-600 capitalize">{key}</p>
-                        <p className="font-medium">{JSON.stringify(value)}</p>
+                        <p className="font-medium">
+                          {formatDataForDisplay(key, value)}
+                        </p>
                       </div>
                     );
                   }
@@ -283,7 +314,7 @@ const RealtorsList = () => {
 
       {/* Edit Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[999]">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
@@ -341,16 +372,16 @@ const RealtorsList = () => {
       )}
 
       <ToastContainer
-              position="top-right"
-              autoClose={5000}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-            />
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 };

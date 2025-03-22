@@ -126,8 +126,8 @@ const ClientTable = () => {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="mb-4 flex items-center justify-between">
+    <div className="container mx-auto p-4 max-sm:w-screen">
+      <div className="mb-4 flex max-sm:flex-col items-center justify-between">
         <input
           type="text"
           placeholder="Search clients..."
@@ -135,7 +135,7 @@ const ClientTable = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <div className="flex gap-2">
+        <div className="flex gap-2 max-sm:flex-col ">
           <select
             className="p-2 border rounded"
             value={sortBy}
@@ -216,7 +216,7 @@ const ClientTable = () => {
 
       {/* View Modal */}
       {selectedClient && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center pt-10">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center pt-10 z-[999]">
           <div className="bg-white p-6 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl mb-4">Client Details</h2>
             {modalLoading ? (
@@ -345,7 +345,7 @@ const ClientTable = () => {
 
       {/* Edit Modal */}
       {editClient && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[999]">
           <div className="bg-white p-6 rounded-lg max-w-2xl w-full">
             <h2 className="text-2xl mb-4">Edit Client</h2>
             {modalLoading ? (

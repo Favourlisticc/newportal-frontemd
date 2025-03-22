@@ -99,7 +99,7 @@ const IncompletePurchasesPage = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6">
+    <div className="p-4 sm:p-6 max-sm:w-screen">
       <h1 className="text-2xl font-bold mb-6">Incomplete Purchases</h1>
 
       {/* Search Bar and Date Filters */}

@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaHome, FaUser, FaMoneyBill, FaCoins, FaBirthdayCake, FaBuilding, FaQuestionCircle, FaWallet, FaChevronRight, FaLaptop, FaFileContract, FaHandshake, FaRegChartBar, FaStore, FaComments, FaPlusSquare, FaListAlt, FaDollarSign, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { FaHome, FaTimes, FaUser, FaMoneyBill, FaCoins, FaBirthdayCake, FaBuilding, FaQuestionCircle, FaWallet, FaChevronRight, FaLaptop, FaFileContract, FaHandshake, FaRegChartBar, FaStore, FaComments, FaPlusSquare, FaListAlt, FaDollarSign, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { RiAccountPinBoxFill } from "react-icons/ri";
 import { MdSupervisorAccount } from "react-icons/md";
 import logo from "../../../public/BR (2).jpg"
 
-const AdminSidebar = ({ bgColor, textColor }) => {
+const AdminSidebar = ({ isSidebarOpen, toggleSidebar  }) => {
   const location = useLocation();
   const [openMenus, setOpenMenus] = useState({});
 
@@ -72,7 +72,7 @@ const AdminSidebar = ({ bgColor, textColor }) => {
       subItems: [
         { name: 'Pending Sales', path: '/admin-dashboard/pending-sales' },
         { name: 'Approved Sales', path: '/admin-dashboard/approved-sales' },
-        { name: 'Unbalanced Sales', path: '/admin-dashboard/unbalanced-sales' },
+        { name: 'Incomplete Sales', path: '/admin-dashboard/unbalanced-sales' },
         { name: 'Rejected Sales', path: '/admin-dashboard/rejected-sales' }
       ]
     },
@@ -105,8 +105,18 @@ const AdminSidebar = ({ bgColor, textColor }) => {
   ];
 
   return (
-    <div className="fixed top-0 left-0 w-64 h-screen bg-gray-800 text-gray-100 flex flex-col overflow-y-auto shadow-xl">
-      {/* Profile Section */}
+    <div
+          className={`fixed top-0 left-0 w-64 h-screen bg-gray-800 text-gray-100 flex flex-col overflow-y-auto shadow-xl transform transition-transform duration-300 ease-in-out ${
+            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          } md:translate-x-0 z-20`}
+        >
+          {/* Close Icon for Mobile */}
+          <div className="md:hidden flex justify-end p-4">
+            <button onClick={toggleSidebar} className="text-gray-400 hover:text-white">
+              <FaTimes className="h-6 w-6" />
+            </button>
+          </div>
+
       <div className="flex items-center justify-center p-4 border-b border-gray-700">
         
         <div>

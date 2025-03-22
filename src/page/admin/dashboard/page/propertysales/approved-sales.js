@@ -36,8 +36,8 @@ const PendingSalesHistory = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="bg-white rounded-lg p-6 max-w-6xl mx-auto shadow-lg">
+    <div className="p-6 bg-gray-100 min-h-screen max-sm:w-screen max-sm:p-3">
+      <div className="bg-white rounded-lg p-6 max-sm:p-3 max-w-6xl mx-auto shadow-lg">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">Approved Sales History</h2>
         <div className="overflow-x-auto rounded-lg border border-gray-200">
           <table className="min-w-full divide-y divide-gray-200">

@@ -149,8 +149,8 @@ const AddPropertyForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
+    <div className="min-h-screen bg-gray-50 p-6 max-sm:p-3">
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8 max-sm:p-3">
         <h2 className="text-3xl font-bold text-[#002657] mb-8 flex items-center gap-2">
           <Home className="w-8 h-8" />
           Add New Property

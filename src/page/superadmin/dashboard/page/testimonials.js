@@ -122,7 +122,7 @@ const TestimonialsManagement = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6">
+    <div className="max-w-5xl mx-auto px-4 py-6 max-sm:w-screen max-sm:p-3">
       <ToastContainer position="top-right" autoClose={3000} />
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Testimonials Management</h1>
       
@@ -171,7 +171,7 @@ const TestimonialsManagement = () => {
                 <div className="space-y-4">
                   {pendingTestimonials.map((testimonial) => (
                     <div key={testimonial._id} className="border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                      <div className="flex justify-between items-start">
+                      <div className="flex max-sm:flex-col justify-between items-start max-sm:items-center">
                         <div>
                           <h3 className="text-lg font-semibold text-gray-800">{testimonial.title}</h3>
                           <p className="text-gray-600 text-sm">
@@ -181,7 +181,7 @@ const TestimonialsManagement = () => {
                             Submitted: {new Date(testimonial.dateSubmitted).toLocaleDateString()}
                           </p>
                         </div>
-                        <div className="flex space-x-2">
+                        <div className="flex space-x-2 max-sm:mt-4">
                           <button
                             onClick={() => handleAccept(testimonial)}
                             disabled={actionInProgress === testimonial._id}

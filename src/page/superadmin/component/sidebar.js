@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaHome, FaUser, FaMoneyBill, FaCoins, FaBirthdayCake, FaBuilding, FaQuestionCircle, FaWallet, FaChevronRight, FaLaptop, FaFileContract, FaHandshake, FaRegChartBar, FaStore, FaComments, FaPlusSquare, FaListAlt, FaDollarSign, FaCheckCircle, FaTimesCircle, FaSpinner, FaUserShield, FaUserCog } from 'react-icons/fa';
+import { FaHome, FaUser, FaMoneyBill, FaCoins, FaBirthdayCake, FaBuilding, FaQuestionCircle, FaWallet, FaChevronRight, FaLaptop, FaFileContract, FaHandshake, FaRegChartBar, FaStore, FaComments, FaPlusSquare, FaListAlt, FaDollarSign, FaCheckCircle, FaTimesCircle, FaSpinner, FaUserShield, FaUserCog, FaTimes } from 'react-icons/fa';
 import { RiAccountPinBoxFill } from "react-icons/ri";
 import { MdSupervisorAccount } from "react-icons/md";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import axios from 'axios';
-import logo from "../../../public/BR (2).jpg";
 import { MdGppGood } from "react-icons/md";
+import logo from "../../../public/BR (2).jpg";
 
-// Updated AdminSidebar component with Admin Management added
-const AdminSidebar = ({ bgColor, textColor }) => {
+const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
   const location = useLocation();
   const [openMenus, setOpenMenus] = useState({});
 
@@ -109,18 +105,29 @@ const AdminSidebar = ({ bgColor, textColor }) => {
   ];
 
   return (
-    <div className="fixed top-0 left-0 w-64 h-screen bg-gray-800 text-gray-100 flex flex-col overflow-y-auto shadow-xl">
+    <div
+      className={`fixed top-0 left-0 w-64 h-screen bg-gray-800 text-gray-100 flex flex-col overflow-y-auto shadow-xl transform transition-transform duration-300 ease-in-out ${
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      } md:translate-x-0 z-20`}
+    >
+      {/* Close Icon for Mobile */}
+      <div className="md:hidden flex justify-end p-4">
+        <button onClick={toggleSidebar} className="text-gray-400 hover:text-white">
+          <FaTimes className="h-6 w-6" />
+        </button>
+      </div>
+
       {/* Profile Section */}
       <div className="flex items-center justify-center p-4 border-b border-gray-700">
-        
         <div>
-        <div className='flex justify-center items-center mt-8'>
-       <img src={logo} className='w-32 h-32' /> 
-       </div>
-          <h2 className=" text-gray-400">Administrator</h2>
+          <div className='flex justify-center items-center mt-8'>
+            <img src={logo} className='w-32 h-32' />
+          </div>
+          <h2 className="text-gray-400">Super Administrator</h2>
         </div>
       </div>
 
+      {/* Menu Items */}
       <nav className="mt-4 flex-1">
         <ul className="space-y-1">
           {menuItems.map((item) => (
@@ -131,6 +138,7 @@ const AdminSidebar = ({ bgColor, textColor }) => {
                   className={`flex items-center p-3 hover:bg-gray-700 ${
                     isLinkActive(item.path) ? 'bg-[#002657]' : ''
                   }`}
+                  onClick={toggleSidebar} // Close sidebar on mobile when a link is clicked
                 >
                   {React.cloneElement(item.icon, {
                     style: { color: isLinkActive(item.path) ? '#E5B30F' : 'inherit' }
@@ -170,6 +178,7 @@ const AdminSidebar = ({ bgColor, textColor }) => {
                             className={`flex items-center p-2 hover:bg-gray-700 ${
                               isLinkActive(subItem.path) ? 'bg-[#002657]' : ''
                             }`}
+                            onClick={toggleSidebar} // Close sidebar on mobile when a link is clicked
                           >
                             <span className={`ml-3 ${isLinkActive(subItem.path) ? 'text-[#E5B30F]' : ''}`}>
                               {subItem.name}

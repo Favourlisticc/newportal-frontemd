@@ -97,7 +97,7 @@ const ViewClients = () => {
                     <th className="border p-2">Username</th>
                     <th className="border p-2">Email</th>
                     <th className="border p-2">Phone</th>
-                    <th className="border p-2">Actions</th>
+                  
                   </tr>
                 </thead>
                 <tbody>
@@ -109,14 +109,7 @@ const ViewClients = () => {
                       <td className="border p-2">{client.username}</td>
                       <td className="border p-2">{client.email}</td>
                       <td className="border p-2">{client.phone}</td>
-                      <td className="border p-2">
-                        <button
-                          className="bg-blue-500 text-white px-4 py-2 rounded"
-                          onClick={() => handleViewPayments(client._id)}
-                        >
-                          View Payments
-                        </button>
-                      </td>
+                    
                     </tr>
                   ))}
                 </tbody>

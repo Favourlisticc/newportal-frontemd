@@ -27,7 +27,7 @@ const AddTestimonials = () => {
         realtorEmail: realtorData.email,
       };
 
-      const response = await fetch('https://newportal-backend.onrender.com/realtor/testimonials/submit', {
+      const response = await fetch('http://localhost:3005/realtor/testimonials/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ const AddTestimonials = () => {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="p-6 bg-white rounded-lg shadow-md"
+      className="p-6 bg-white rounded-lg shadow-md m-10"
     >
       <h2 className="text-2xl font-semibold mb-6">Add Testimonials</h2>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -65,7 +65,7 @@ const AddTestimonials = () => {
           <label className="block text-sm font-medium mb-1 text-left">Property Purchased</label>
           <input
             type="text"
-            {...register("title", { required: "Title is required" })}
+            {...register("propertypurchased", { required: "Property Purchased is required" })}
             className="w-full p-2 border rounded-lg"
           />
           {errors.title && <span className="text-red-500 text-sm">{errors.title.message}</span>}

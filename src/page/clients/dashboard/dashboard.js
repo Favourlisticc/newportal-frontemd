@@ -12,8 +12,11 @@ const Home = () => {
   const [referralInfo, setReferralInfo] = useState(null);
   const [testimonials, setTestimonials] = useState([]);
   const [isLoadingTestimonials, setIsLoadingTestimonials] = useState(false);
+  const [approvedPurchases, setApprovedPurchases] = useState([]);
+  const [loadingApprovedPurchases, setLoadingApprovedPurchases] = useState(true);
   const testimonialsContainerRef = useRef(null);
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
+  const [startX, setStartX] = useState(null); // For touch swipe functionality
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,10 +38,17 @@ const Home = () => {
           email: clientData.upline?.email || 'N/A'
         });
 
+        // Fetch approved purchases
+        const purchasesResponse = await fetch(
+          `https://newportal-backend.onrender.com/client/purchases?_id=${clientId}&status=confirmed`
+        );
+        const purchasesData = await purchasesResponse.json();
+        setApprovedPurchases(purchasesData);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
+        setLoadingApprovedPurchases(false);
       }
     };
 
@@ -67,22 +77,29 @@ const Home = () => {
     fetchTestimonials();
   }, []);
 
-  // Scroll testimonials left
-  const scrollLeft = () => {
-    if (testimonials.length === 0) return;
-
-    setCurrentTestimonialIndex(prev =>
-      prev === 0 ? testimonials.length - 1 : prev - 1
-    );
+  const handleTouchStart = (e) => {
+    setStartX(e.touches[0].clientX);
   };
 
-  // Scroll testimonials right
-  const scrollRight = () => {
-    if (testimonials.length === 0) return;
+  const handleTouchMove = (e) => {
+    if (startX === null) return;
 
-    setCurrentTestimonialIndex(prev =>
-      prev === testimonials.length - 1 ? 0 : prev + 1
-    );
+    const currentX = e.touches[0].clientX;
+    const diff = startX - currentX;
+
+    if (diff > 50) {
+      // Swipe left
+      setCurrentTestimonialIndex((prevIndex) =>
+        prevIndex === testimonials.length - 1 ? 0 : prevIndex + 1
+      );
+      setStartX(null);
+    } else if (diff < -50) {
+      // Swipe right
+      setCurrentTestimonialIndex((prevIndex) =>
+        prevIndex === 0 ? testimonials.length - 1 : prevIndex - 1
+      );
+      setStartX(null);
+    }
   };
 
   return (
@@ -95,79 +112,48 @@ const Home = () => {
       <div className="bg-white p-3 md:p-6 rounded-lg shadow-md mb-6 md:mb-8 relative">
         <h2 className="text-xl font-semibold mb-4">Testimonials</h2>
         <div className="relative">
-          {/* Left Scroll Button */}
-          <button
-            onClick={scrollLeft}
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-[#002657] text-white p-2 rounded-full z-10"
-            aria-label="Previous testimonial"
-          >
-            <FaChevronLeft />
-          </button>
-
-          {/* Mobile and Desktop Testimonials */}
-          <div className="w-full overflow-hidden px-8">
-            {/* Mobile View (Single Card) */}
-            <div className="block md:hidden">
-              {testimonials.length > 0 && (
+          {/* Loading State for Testimonials */}
+          {isLoadingTestimonials ? (
+            <div className="flex justify-center items-center h-32">
+              <FaSpinner className="animate-spin text-2xl text-[#002657]" />
+            </div>
+          ) : testimonials.length > 0 ? (
+            <div
+              className="w-full overflow-hidden px-8"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+            >
+              {/* Mobile and Desktop View (Single Card) */}
+              <AnimatePresence>
                 <motion.div
                   key={testimonials[currentTestimonialIndex]._id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
+                  initial={{ opacity: 0, x: 100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -100 }}
+                  transition={{ duration: 0.5 }}
                   className="w-full p-4 border border-gray-200 rounded-lg"
                 >
                   <h3 className="font-semibold">{testimonials[currentTestimonialIndex].title}</h3>
                   <p className="text-gray-700">{testimonials[currentTestimonialIndex].content}</p>
                   <p className="text-sm text-gray-500 mt-2">
-                    - {testimonials[currentTestimonialIndex].realtorName} ({testimonials[currentTestimonialIndex].realtorEmail})
+                    {testimonials[currentTestimonialIndex].realtorName}
                   </p>
                 </motion.div>
-              )}
-            </div>
-
-            {/* Desktop View (Scrollable) */}
-            <div
-              ref={testimonialsContainerRef}
-              className="hidden md:flex overflow-x-auto space-x-4 p-4 scrollbar-hide"
-            >
-              <AnimatePresence>
-                {testimonials.map((testimonial) => (
-                  <motion.div
-                    key={testimonial._id}
-                    initial={{ opacity: 0, x: 50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -50 }}
-                    transition={{ duration: 0.5 }}
-                    className="flex-shrink-0 w-72 p-4 border border-gray-200 rounded-lg"
-                  >
-                    <h3 className="font-semibold">{testimonial.title}</h3>
-                    <p className="text-gray-700">{testimonial.content}</p>
-                    <p className="text-sm text-gray-500 mt-2">
-                      - {testimonial.realtorName} ({testimonial.realtorEmail})
-                    </p>
-                  </motion.div>
-                ))}
               </AnimatePresence>
             </div>
-          </div>
-
-          {/* Right Scroll Button */}
-          <button
-            onClick={scrollRight}
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-[#002657] text-white p-2 rounded-full z-10"
-            aria-label="Next testimonial"
-          >
-            <FaChevronRight />
-          </button>
+          ) : (
+            <p className="text-center text-gray-500">No testimonials available.</p>
+          )}
         </div>
 
-        {/* Pagination Indicators for Mobile */}
-        <div className="flex justify-center mt-4 md:hidden">
+        {/* Pagination Indicators */}
+        <div className="flex justify-center mt-4">
           {testimonials.map((_, index) => (
             <span
               key={index}
-              className={`h-2 w-2 mx-1 rounded-full ${currentTestimonialIndex === index ? 'bg-[#002657]' : 'bg-gray-300'}`}
+              className={`h-2 w-2 mx-1 rounded-full ${
+                currentTestimonialIndex === index ? 'bg-[#002657]' : 'bg-gray-300'
+              }`}
             />
           ))}
         </div>
@@ -208,9 +194,55 @@ const Home = () => {
         </div>
       </div>
 
+      
+
+      {/* Approved Transactions Section */}
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden mt-8">
+        <h2 className="text-xl font-semibold mb-4 p-6">Transactions</h2>
+        {loadingApprovedPurchases ? (
+          <div className="flex justify-center p-8">
+            <TailSpin color="#6366f1" height={40} width={40} />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-500">Property</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-500">Price</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-500">Purchase Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {approvedPurchases.map((purchase) => (
+                  <tr key={purchase._id}>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center">
+                        <img
+                          src="https://via.placeholder.com/80"
+                          alt="Property"
+                          className="w-12 h-12 rounded-lg object-cover mr-4"
+                        />
+                        <span className="font-medium">{purchase.propertyName}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 font-semibold text-gray-900">
+                      ₦{purchase.amount.toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 text-gray-500">
+                      {new Date(purchase.createdAt).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
       {/* Referral Info Section */}
       {referralInfo && (
-        <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 mb-8">
+        <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 mb-8 mt-40">
           <h3 className="text-xl font-semibold text-gray-800 mb-4">You were referred by:</h3>
           <div className="space-y-2">
             <p className="text-gray-900 text-lg">{referralInfo.name}</p>

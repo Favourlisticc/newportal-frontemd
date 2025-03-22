@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { FiSearch, FiFrown } from 'react-icons/fi'; // Import icons for search and no results
 
 export default function FundingHistory() {
   const [activeTab, setActiveTab] = useState('pending');
@@ -21,9 +22,6 @@ export default function FundingHistory() {
     try {
       const response = await axios.get('https://newportal-backend.onrender.com/admin/funds');
       setFunds(response.data);
-      console.log(response.data)
-
-      
     } catch (error) {
       toast.error('Failed to fetch funds');
     } finally {
@@ -57,15 +55,17 @@ export default function FundingHistory() {
     }
   };
 
+  // Fix the search filter
   const filteredData = funds
     .filter(fund => fund.status === activeTab)
-    .filter(fund => 
-      fund.username.toLowerCase().includes(search.toLowerCase()) ||
-      fund.user.fullName.toLowerCase().includes(search.toLowerCase())
-    );
+    .filter(fund => {
+      const usernameMatch = fund.username?.toLowerCase().includes(search.toLowerCase());
+      const fullNameMatch = fund.user?.fullName?.toLowerCase().includes(search.toLowerCase());
+      return usernameMatch || fullNameMatch;
+    });
 
   return (
-    <div className="max-w-5xl mx-auto p-6 bg-white shadow rounded-lg">
+    <div className="max-w-5xl mx-auto p-6 bg-white shadow rounded-lg max-sm:w-screen">
       <ToastContainer />
       <h2 className="text-2xl font-bold mb-4">Funding History</h2>
       
@@ -86,17 +86,21 @@ export default function FundingHistory() {
 
       {/* Search */}
       <div className="mt-4 flex justify-between items-center">
-        <input
-          type="text"
-          placeholder="Search by username or name..."
-          className="border p-2 rounded w-64"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <div className="relative w-64">
+          <input
+            type="text"
+            placeholder="Search by username or name..."
+            className="border p-2 pl-10 rounded w-full"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <FiSearch className="absolute left-3 top-3 text-gray-400" />
+        </div>
       </div>
 
       {/* Table */}
-      <table className="min-w-full bg-white border mt-4">
+     <div className=' overflow-x-auto'>
+     <table className="min-w-full bg-white border mt-4">
         <thead>
           <tr className="border-b bg-gray-200">
             <th className="p-3 text-left">User</th>
@@ -112,7 +116,7 @@ export default function FundingHistory() {
         <tbody>
           {loading ? (
             <tr>
-              <td colSpan="6" className="p-3 text-center">
+              <td colSpan="8" className="p-3 text-center">
                 <div className="flex justify-center">
                   <svg className="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -180,19 +184,23 @@ export default function FundingHistory() {
             ))
           ) : (
             <tr>
-              <td colSpan="6" className="p-3 text-center text-gray-500">
-                No data available
+              <td colSpan="8" className="p-3 text-center">
+                <div className="flex flex-col items-center justify-center py-6">
+                  <FiFrown className="text-4xl text-gray-400 mb-2" />
+                  <p className="text-gray-500">No results found</p>
+                </div>
               </td>
             </tr>
           )}
         </tbody>
       </table>
+     </div>
 
       {/* Modal */}
       {selectedImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[999] overflow-x-auto">
           <div className="bg-white p-4 rounded-lg">
-            <img src={selectedImage} alt="Proof" className="max-w-full max-h-screen" />
+            <img src={selectedImage} alt="Proof" className=" h-96" />
             <button
               onClick={() => setSelectedImage(null)}
               className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"

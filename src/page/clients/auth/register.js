@@ -21,6 +21,10 @@ const SignupForm = () => {
   const [otpExpiry, setOtpExpiry] = useState(null);
   const [currentStep, setCurrentStep] = useState(1); // Track the current step/card
 
+    useEffect(() => {
+      document.title = "Baay Realtors - Client Registration";
+    }, []);
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',

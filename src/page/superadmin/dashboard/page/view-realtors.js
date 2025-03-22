@@ -142,16 +142,33 @@ const RealtorsList = () => {
     XLSX.writeFile(workbook, 'realtors.xlsx');
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader className="w-8 h-8 animate-spin text-[#002657]" />
-      </div>
-    );
-  }
+  // Helper function to format data for display
+  const formatDataForDisplay = (key, value) => {
+    if (value === null || value === undefined || value === '') {
+      return 'No data for this field';
+    }
+
+    // Format dates
+    if (key.toLowerCase().includes('date') || key.toLowerCase().includes('dob') || key.toLowerCase().includes('createdat')) {
+      return new Date(value).toLocaleString();
+    }
+
+    // Format upline information
+    if (key === 'upline' && typeof value === 'object') {
+      return value.name ? `${value.name} (${value.phone}, ${value.email})` : 'No upline data';
+    }
+
+    // Format arrays (e.g., referrals)
+    if (Array.isArray(value)) {
+      return value.length > 0 ? value.join(', ') : 'No data for this field';
+    }
+
+    // Default case
+    return value;
+  };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto max-sm:w-screen">
       <div className="mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="relative w-full sm:w-96">
           <input
@@ -164,8 +181,8 @@ const RealtorsList = () => {
           <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
+        <div className="flex max-sm:flex-col items-center gap-4">
+          <div className="flex max-sm:flex-col items-center gap-2 ">
             <DatePicker
               selected={startDate}
               onChange={(date) => setStartDate(date)}
@@ -210,46 +227,60 @@ const RealtorsList = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {realtors.map((realtor) => (
-              <tr key={realtor._id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">{realtor.username}</td>
-                <td className="px-6 py-4">{`${realtor.firstName} ${realtor.lastName}`}</td>
-                <td className="px-6 py-4">{realtor.email}</td>
-                <td className="px-6 py-4">{realtor.phone}</td>
-                <td className="px-6 py-4">
-                  <div className="flex justify-center gap-2">
-                    <button
-                      onClick={() => handleView(realtor._id)}
-                      disabled={actionLoading === realtor._id}
-                      className="p-2 text-[#002657] hover:bg-[#002657] hover:text-white rounded-full transition-colors"
-                    >
-                      <Eye className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => handleEdit(realtor._id)}
-                      disabled={actionLoading === realtor._id}
-                      className="p-2 text-[#E5B305] hover:bg-[#E5B305] hover:text-white rounded-full transition-colors"
-                    >
-                      <Edit2 className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(realtor._id)}
-                      disabled={actionLoading === realtor._id}
-                      className="p-2 text-red-600 hover:bg-red-600 hover:text-white rounded-full transition-colors"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                  </div>
+            {loading ? (
+              <tr>
+                <td colSpan="5" className="text-center py-8">
+                  <Loader className="w-8 h-8 animate-spin text-[#002657] mx-auto" />
                 </td>
               </tr>
-            ))}
+            ) : realtors.length > 0 ? (
+              realtors.map((realtor) => (
+                <tr key={realtor._id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4">{realtor.username}</td>
+                  <td className="px-6 py-4">{`${realtor.firstName} ${realtor.lastName}`}</td>
+                  <td className="px-6 py-4">{realtor.email}</td>
+                  <td className="px-6 py-4">{realtor.phone}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex justify-center gap-2">
+                      <button
+                        onClick={() => handleView(realtor._id)}
+                        disabled={actionLoading === realtor._id}
+                        className="p-2 text-[#002657] hover:bg-[#002657] hover:text-white rounded-full transition-colors"
+                      >
+                        <Eye className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => handleEdit(realtor._id)}
+                        disabled={actionLoading === realtor._id}
+                        className="p-2 text-[#E5B305] hover:bg-[#E5B305] hover:text-white rounded-full transition-colors"
+                      >
+                        <Edit2 className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(realtor._id)}
+                        disabled={actionLoading === realtor._id}
+                        className="p-2 text-red-600 hover:bg-red-600 hover:text-white rounded-full transition-colors"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="text-center py-8 text-gray-500">
+                  No realtors found.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
       {/* View Modal */}
       {isViewModalOpen && selectedRealtor && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[999]">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
@@ -268,7 +299,7 @@ const RealtorsList = () => {
                       <div key={key} className="border-b border-gray-200 pb-2">
                         <p className="text-sm text-gray-600 capitalize">{key}</p>
                         <p className="font-medium">
-                          {typeof value === 'object' ? JSON.stringify(value, null, 2) : value}
+                          {formatDataForDisplay(key, value)}
                         </p>
                       </div>
                     );
@@ -283,7 +314,7 @@ const RealtorsList = () => {
 
       {/* Edit Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[999]">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">

@@ -116,9 +116,11 @@ const ProfilePage = () => {
     e.preventDefault();
     setLoading(true);
 
+    console.log(user)
+
     try {
       const response = await axios.put(
-        `https://newportal-backend.onrender.com/realtor/edit-profile`,
+        `http://localhost:3005/realtor/edit-profile`,
         {
           userId: user._id,
           ...user,

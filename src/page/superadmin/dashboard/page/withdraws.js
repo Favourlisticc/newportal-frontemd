@@ -50,7 +50,7 @@ const PendingWithdrawals = () => {
   };
 
   return (
-    <div className="p-6 min-h-screen bg-white">
+    <div className="p-6 min-h-screen bg-white max-sm:w-screen max-sm:p-3">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-3xl font-bold text-[#002657] mb-6">
           Withdrawal Requests

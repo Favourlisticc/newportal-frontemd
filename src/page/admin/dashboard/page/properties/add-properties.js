@@ -16,7 +16,7 @@ import {
   ClipboardList,
   CalendarCheck,
   Percent,
-  BadgePercent
+  BadgePercent,
 } from "lucide-react";
 
 const AddPropertyForm = () => {
@@ -67,7 +67,7 @@ const AddPropertyForm = () => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", "giweexpv");
-    
+
     const response = await axios.post(
       "https://api.cloudinary.com/v1_1/dwpoik1jm/image/upload",
       formData
@@ -84,11 +84,11 @@ const AddPropertyForm = () => {
       // Upload files to Cloudinary
       const [featuredImageUrl, subscriptionFormUrl] = await Promise.all([
         uploadToCloudinary(formData.featuredImage),
-        uploadToCloudinary(formData.subscriptionForm)
+        uploadToCloudinary(formData.subscriptionForm),
       ]);
 
       const galleryUrls = await Promise.all(
-        [...formData.galleryImages].map(file => uploadToCloudinary(file))
+        [...formData.galleryImages].map((file) => uploadToCloudinary(file))
       );
 
       // Submit property data
@@ -100,7 +100,7 @@ const AddPropertyForm = () => {
         amount: Number(formData.amount),
         bedrooms: Number(formData.bedrooms),
         bathrooms: Number(formData.bathrooms),
-        landSize: Number(formData.landSize)
+        landSize: Number(formData.landSize),
       });
 
       toast.success("Property added successfully!");
@@ -120,7 +120,7 @@ const AddPropertyForm = () => {
         landSize: "",
         description: "",
         commission: "",
-        indirectcommission: ""
+        indirectcommission: "",
       });
       setErrors({});
     } catch (error) {
@@ -134,7 +134,7 @@ const AddPropertyForm = () => {
   const handleFileChange = (e) => {
     const { name, files } = e.target;
     setErrors({ ...errors, [name]: null });
-    
+
     if (name === "galleryImages") {
       setFormData({ ...formData, [name]: [...files] });
     } else {
@@ -149,8 +149,8 @@ const AddPropertyForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8">
+    <div className="min-h-screen bg-gray-50 p-6 max-sm:p-3">
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8 max-sm:p-3">
         <h2 className="text-3xl font-bold text-[#002657] mb-8 flex items-center gap-2">
           <Home className="w-8 h-8" />
           Add New Property
@@ -192,7 +192,7 @@ const AddPropertyForm = () => {
               <div>
                 <label className="block text-sm font-medium text-[#002657] mb-2 flex items-center gap-2">
                   <FileText className="w-5 h-5" />
-                  Subscription Form
+                  Property Brochure
                 </label>
                 <input
                   type="file"
@@ -272,13 +272,16 @@ const AddPropertyForm = () => {
                 <Home className="w-5 h-5" />
                 Property Type
               </label>
-              <input
-                type="text"
+              <select
                 name="propertyType"
                 value={formData.propertyType}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#E5B30F] focus:border-[#E5B30F]"
-              />
+              >
+                <option value="">Select Property Type</option>
+                <option value="Land Property">Land Property</option>
+                <option value="Home Property">Home Property</option>
+              </select>
               {errors.propertyType && <p className="text-red-500 text-sm mt-1">{errors.propertyType}</p>}
             </div>
 
@@ -330,7 +333,6 @@ const AddPropertyForm = () => {
               {errors.bathrooms && <p className="text-red-500 text-sm mt-1">{errors.bathrooms}</p>}
             </div>
 
-
             <div>
               <label className="block text-sm font-medium text-[#002657] mb-2 flex items-center gap-2">
                 <Percent className="w-5 h-5" />
@@ -360,8 +362,6 @@ const AddPropertyForm = () => {
               />
               {errors.indirectcommission && <p className="text-red-500 text-sm mt-1">{errors.indirectcommission}</p>}
             </div>
-
-            
 
             <div>
               <label className="block text-sm font-medium text-[#002657] mb-2 flex items-center gap-2">
@@ -393,6 +393,7 @@ const AddPropertyForm = () => {
             />
             {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
           </div>
+
           <button
             type="submit"
             disabled={loading}

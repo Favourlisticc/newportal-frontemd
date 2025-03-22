@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import ClientSidebar from "../components/sidebar";
 import Navbar from "../components/navbar";
@@ -7,12 +7,16 @@ const ProtectedRoute = () => {
   const jwt = localStorage.getItem("Clienttoken");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  useEffect(() => {
+    document.title = "Baay Realtors - Client Portal";
+  }, []);
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
   if (!jwt) {
-    return <Navigate to="/signup" />;
+    return <Navigate to="/client/login" />;
   }
 
   return (

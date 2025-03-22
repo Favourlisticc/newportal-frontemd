@@ -11,7 +11,7 @@ const AdminDashboard = () => {
     pendingWithdrawals: 0,
     totalPropertiesBought: 0,
     totalAmount: 0,
-    totalClients: 0, // Assuming you have this stat
+    totalClients: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -47,7 +47,7 @@ const AdminDashboard = () => {
             {React.cloneElement(icon, { className: 'text-xl md:text-2xl' })}
           </div>
           <div className="flex-1">
-            <p className="text-xs md:text-sm text-gray-200 mb-1">{title}</p>
+            <p className="text-sm md:text-base text-left text-gray-200 mb-1">{title}</p>
             {isLoading ? (
               <div className="h-6 flex items-center">
                 <svg className="animate-spin h-4 w-4 md:h-5 md:w-5 text-white" viewBox="0 0 24 24">
@@ -56,7 +56,7 @@ const AdminDashboard = () => {
                 </svg>
               </div>
             ) : (
-              <p className="text-lg md:text-2xl font-bold">
+              <p className="text-lg md:text-2xl font-bold text-left">
                 {formattedValue}
               </p>
             )}
@@ -77,28 +77,31 @@ const AdminDashboard = () => {
     ];
 
     return (
-      <ResponsiveContainer width="100%" height={400}>
-        <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="value" fill="#8884d8" />
-        </BarChart>
-      </ResponsiveContainer>
+      <div className="w-full h-[300px] md:h-[400px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="value" fill="#8884d8" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     );
   };
 
   return (
-    <div className="p-4 md:p-6 bg-gray-100 min-h-screen">
+    <div className="p-4 md:p-6 bg-gray-100 min-h-screen max-sm:p-1 max-sm:w-screen">
       {/* Dashboard Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8 max-sm:w-screen max-sm:p-3">
         <StatCard
           icon={<FaUsers />}
           title="REGISTERED REALTORS"
           value={stats.totalRealtor || 0}
           color="bg-gradient-to-r from-blue-500 to-blue-600"
+          className=" text-left"
         />
         <StatCard
           icon={<FaStar />}
@@ -126,18 +129,11 @@ const AdminDashboard = () => {
         />
       </div>
 
-      <TodaysBirthdays/>
-
-      {/* Chart Section */}
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden p-4 md:p-6">
-        <h3 className="text-base md:text-lg font-semibold text-[#002657] mb-4">
-          Dashboard Overview
-        </h3>
-        <ChartComponent stats={stats} />
-      </div>
+      {/* Todays Birthdays */}
+      <TodaysBirthdays />
 
       {/* Earnings Table */}
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden mt-6">
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden mt-6 max-sm:w-screen max-sm:p-3">
         <div className="p-4 md:p-6 bg-[#002657]">
           <h3 className="text-base md:text-lg font-semibold text-[#E5B30F]">
             <FaFileContract className="inline mr-2" />
@@ -161,7 +157,7 @@ const AdminDashboard = () => {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  {['No', 'Username', 'Phone', 'Property', 'Property ID', 'Payment Type', 'Amount', 'Purchase Price', 'Commission'].map((header) => (
+                  {['No', 'Username', 'Phone', 'Property', 'Property ID', 'Payment Type', 'Amount Paid', 'Purchase Price', 'Commission'].map((header) => (
                     <th 
                       key={header}
                       className="px-4 py-2 md:px-6 md:py-3 text-left text-xs font-medium text-[#002657] uppercase tracking-wider"
@@ -176,19 +172,19 @@ const AdminDashboard = () => {
                 {/* Example static data */}
                 {[].map((entry, index) => (
                   <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-4 py-2 md:px-6 md:py-4 whitespace-nowrap">{index + 1}</td>
-                    <td className="px-4 py-2 md:px-6 md:py-4 whitespace-nowrap">{entry.username}</td>
-                    <td className="px-4 py-2 md:px-6 md:py-4 whitespace-nowrap">{entry.phone}</td>
-                    <td className="px-4 py-2 md:px-6 md:py-4 whitespace-nowrap">{entry.property}</td>
-                    <td className="px-4 py-2 md:px-6 md:py-4 whitespace-nowrap">{entry.propertyId}</td>
-                    <td className="px-4 py-2 md:px-6 md:py-4 whitespace-nowrap">{entry.paymentType}</td>
-                    <td className="px-4 py-2 md:px-6 md:py-4 whitespace-nowrap">
+                    <td className="px-4 py-2 md:px-6 md:py-4 text-sm whitespace-nowrap">{index + 1}</td>
+                    <td className="px-4 py-2 md:px-6 md:py-4 text-sm whitespace-nowrap">{entry.username}</td>
+                    <td className="px-4 py-2 md:px-6 md:py-4 text-sm whitespace-nowrap">{entry.phone}</td>
+                    <td className="px-4 py-2 md:px-6 md:py-4 text-sm whitespace-nowrap">{entry.property}</td>
+                    <td className="px-4 py-2 md:px-6 md:py-4 text-sm whitespace-nowrap">{entry.propertyId}</td>
+                    <td className="px-4 py-2 md:px-6 md:py-4 text-sm whitespace-nowrap">{entry.paymentType}</td>
+                    <td className="px-4 py-2 md:px-6 md:py-4 text-sm whitespace-nowrap">
                       {Number(entry.amount).toLocaleString('en-NG', { style: 'currency', currency: 'NGN' })}
                     </td>
-                    <td className="px-4 py-2 md:px-6 md:py-4 whitespace-nowrap">
+                    <td className="px-4 py-2 md:px-6 md:py-4 text-sm whitespace-nowrap">
                       {Number(entry.purchasePrice).toLocaleString('en-NG', { style: 'currency', currency: 'NGN' })}
                     </td>
-                    <td className="px-4 py-2 md:px-6 md:py-4 whitespace-nowrap">
+                    <td className="px-4 py-2 md:px-6 md:py-4 text-sm whitespace-nowrap">
                       {Number(entry.commission).toLocaleString('en-NG', { style: 'currency', currency: 'NGN' })}
                     </td>
                   </tr>

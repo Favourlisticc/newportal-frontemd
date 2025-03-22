@@ -37,6 +37,11 @@ const RegisterForm = () => {
   const navigate = useNavigate();
   const timerRef = useRef(null);
 
+
+   useEffect(() => {
+        document.title = "Baay Realtors - Realtor Registration";
+      }, []);
+
   // Add useEffect to set initial referrer value
   useEffect(() => {
     if (referralId) {

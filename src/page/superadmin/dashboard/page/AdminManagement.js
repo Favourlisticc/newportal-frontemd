@@ -101,7 +101,7 @@ const AdminManagement = () => {
   
     console.log(admins)
     return (
-      <div className="p-6 mt-20">
+      <div className="p-6 mt-20 max-sm:w-screen">
         <ToastContainer />
         <h1 className="text-3xl font-semibold mb-6 text-gray-800">Admin Management</h1>
         
