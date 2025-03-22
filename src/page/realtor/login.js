@@ -23,7 +23,7 @@ const RealtorLogin = () => {
 
 
    useEffect(() => {
-        document.title = "Baay Realtors - Realtor Login";
+        document.title = "Baay Realty - Realtor Login";
       }, []);
 
   // Generate random CAPTCHA

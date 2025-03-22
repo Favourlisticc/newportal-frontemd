@@ -8,7 +8,7 @@ const ProtectedRoute = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    document.title = "Baay Realtors - Client Portal";
+    document.title = "Baay Realty - Client Portal";
   }, []);
 
   const toggleSidebar = () => {

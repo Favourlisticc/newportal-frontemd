@@ -15,7 +15,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { to: "/client-dashboard/products", icon: FiFileText, text: "Properties" },
     { to: "/client-dashboard/unsettled-sales", icon: FcDebt, text: "Unsettled Sales" },
     { to: "/client-dashboard/purchasehistory", icon: MdWorkHistory, text: "Purchase Record" },
-    { to: "/client-dashboard/upload", icon: FiUpload, text: "Data Upload" },
+    // { to: "/client-dashboard/upload", icon: FiUpload, text: "Data Upload" },
     { to: "/client-dashboard/profile", icon: RiAccountBoxLine, text: "Profile" },
     { to: "/client-dashboard/contact-support", icon: FaRegBuilding, text: "Message Support" },
     { to: "/client-dashboard/add-testimonials", icon: FaFileAlt, text: "Testimonials" },

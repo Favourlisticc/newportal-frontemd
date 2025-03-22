@@ -72,10 +72,10 @@ const RemindersTable = () => {
                 {reminder.propertyName}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                ${reminder.propertyActualPrice}
+              ₦{reminder.propertyActualPrice}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                ${reminder.reminders[0].amountRemaining}
+              ₦{reminder.reminders[0].amountRemaining}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 {new Date(reminder.reminders[0].nextPaymentDate).toLocaleDateString()}

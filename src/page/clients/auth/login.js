@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import Swal from 'sweetalert2';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import logo from "../../../public/Baay Realty logo (2).png";
 
@@ -18,7 +18,7 @@ const LoginForm = () => {
   const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-         document.title = "Baay Realtors - Client Login";
+         document.title = "Baay Realty - Client Login";
        }, []);
 
   // Check existing authentication
@@ -51,45 +51,45 @@ const LoginForm = () => {
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validateForm()) return;
 
-    setLoading(true);
-    try {
-      const response = await fetch('https://newportal-backend.onrender.com/auth/client/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-        }),
+  setLoading(true);
+  try {
+    const response = await fetch('http://localhost:3005/auth/client/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: formData.username,
+        password: formData.password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      localStorage.setItem('Clienttoken', data.token);
+      localStorage.setItem('Clientuser', JSON.stringify(data.user));
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Login Successful!',
+        text: 'Redirecting to dashboard...',
+        showConfirmButton: false,
+        timer: 2000,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem('Clienttoken', data.token);
-        localStorage.setItem('Clientuser', JSON.stringify(data.user));
-
-        Swal.fire({
-          icon: 'success',
-          title: 'Login Successful!',
-          text: 'Redirecting to dashboard...',
-          showConfirmButton: false,
-          timer: 2000,
-        });
-
-        navigate('/client-dashboard');
-      } else {
-        toast.error(data.message || 'Login failed');
-      }
-    } catch (error) {
-      toast.error('Network error. Please try again.');
-    } finally {
-      setLoading(false);
+      navigate('/client-dashboard');
+    } else {
+      toast.error(data.message || 'Login failed');
     }
-  };
+  } catch (error) {
+    toast.error('Network error. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -405,6 +405,19 @@ const handleForgotPassword = async () => {
           </form>
         </div>
       </div>
+
+
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 };

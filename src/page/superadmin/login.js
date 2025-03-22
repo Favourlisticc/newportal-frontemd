@@ -30,7 +30,7 @@ const SuperAdminLogin = () => {
 
 
    useEffect(() => {
-        document.title = "Baay Realtors - SuperAdmin Login";
+        document.title = "Baay Realty - SuperAdmin Login";
       }, []);
 
   // Check if the user is already logged in

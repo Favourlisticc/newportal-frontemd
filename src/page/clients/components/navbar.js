@@ -1,10 +1,14 @@
 import { FiLogOut, FiMenu } from "react-icons/fi";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from 'react-router-dom';
+import axios from "axios";
 
 const Navbar = ({ onToggleSidebar }) => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+
+  const [birthdayMessage, setBirthdayMessage] = useState(null);
+
 
   useEffect(() => {
     const storedUser = localStorage.getItem("Clientuser");
@@ -12,6 +16,40 @@ const Navbar = ({ onToggleSidebar }) => {
       setUser(JSON.parse(storedUser));
     }
   }, []);
+
+  useEffect(() => {
+
+    
+    
+    if (user) {
+      // Fetch birthday message if today is the user's birthday
+      const today = new Date();
+      const userDob = new Date(user.dateOfBirth);
+
+     
+
+      if (
+        today.getMonth() === userDob.getMonth() &&
+        today.getDate() === userDob.getDate()
+      ) {
+        axios
+          .get(`http://localhost:3005/client/birthday-message?userId=${user._id}`)
+          .then((response) => {
+            if (response.data.message) {
+              setBirthdayMessage(response.data.message);
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching birthday message:", error);
+          });
+      }
+    }
+  }, [user]);
+
+
+  console.log("userdata", user)
+
+ 
 
   const handleLogout = () => {
     localStorage.removeItem("Clienttoken");
@@ -29,6 +67,15 @@ const Navbar = ({ onToggleSidebar }) => {
         >
           <FiMenu className="w-6 h-6" />
         </button>
+
+
+           {/* Birthday Message */}
+           {birthdayMessage && (
+          <div className="flex items-center space-x-2 bg-[#E5B305] text-[#002657] px-4 py-2 rounded-lg">
+            <span className="font-medium">{birthdayMessage}</span>
+            <span className="text-2xl">🎉</span>
+          </div>
+        )}
 
         {/* User Info */}
         {user && (

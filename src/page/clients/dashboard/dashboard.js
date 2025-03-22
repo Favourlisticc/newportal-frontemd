@@ -5,6 +5,7 @@ import { FaUsers, FaThumbsUp, FaCopy, FaFile, FaStar, FaMoneyBillWave, FaSpinner
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { motion, AnimatePresence } from 'framer-motion'; // For animations
+import RemindersTable from './unsettled-sales.js'; // Import the RemindersTable component
 
 const Home = () => {
   const [stats, setStats] = useState({ totalPurchases: 0, totalProperties: 0 });
@@ -108,6 +109,14 @@ const Home = () => {
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
       </div>
 
+      {/* Reminders Section */}
+      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+        <h2 className="text-xl font-semibold mb-4">Payment Reminders</h2>
+        <div className="overflow-x-auto">
+          <RemindersTable />
+        </div>
+      </div>
+
       {/* Testimonials Section */}
       <div className="bg-white p-3 md:p-6 rounded-lg shadow-md mb-6 md:mb-8 relative">
         <h2 className="text-xl font-semibold mb-4">Testimonials</h2>
@@ -193,8 +202,6 @@ const Home = () => {
           </div>
         </div>
       </div>
-
-      
 
       {/* Approved Transactions Section */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden mt-8">

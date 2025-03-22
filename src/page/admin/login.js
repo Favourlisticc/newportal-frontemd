@@ -29,7 +29,7 @@ const AdminLogin = () => {
   const navigate = useNavigate();
 
     useEffect(() => {
-      document.title = "Baay Realtors - Admin Login";
+      document.title = "Baay Realty - Admin Login";
     }, []);
 
   // Check if the user is already logged in

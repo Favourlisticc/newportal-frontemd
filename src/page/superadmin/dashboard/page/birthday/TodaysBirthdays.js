@@ -17,7 +17,7 @@ const TodaysBirthdays = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('https://newportal-backend.onrender.com/admin/todays-birthdays');
+        const response = await axios.get('http://localhost:3005/admin/todays-birthdays');
         setBirthdays(response.data);
       } catch (error) {
         toast.error("Failed to load birthdays");
@@ -66,7 +66,7 @@ const TodaysBirthdays = () => {
     }
 
     try {
-      const response = await axios.post('https://newportal-backend.onrender.com/admin/send-birthday-email', {
+      const response = await axios.post('http://localhost:3005/admin/send-birthday-email', {
         email: selectedUser.email,
         message: message
       });
@@ -89,7 +89,7 @@ const TodaysBirthdays = () => {
   };
 
   return (
-    <div className="p-6 min-h-screen bg-white max-sm:w-screen max-sm:p-3 ">
+    <div className="p-6 h-fit bg-white max-sm:w-screen max-sm:p-3 ">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-3">
@@ -143,48 +143,31 @@ const TodaysBirthdays = () => {
               <table className="w-full">
                 <thead className="bg-[#002657] text-white">
                   <tr>
-                    <th className="px-6 py-4 text-left">
-                      <div className="flex items-center space-x-2">
-                        <User size={18} />
-                        <span>Username</span>
-                      </div>
-                    </th>
-                    <th className="px-6 py-4 text-left">
-                      <div className="flex items-center space-x-2">
-                        <User size={18} />
-                        <span>Full Name</span>
-                      </div>
-                    </th>
-                    <th className="px-6 py-4 text-left">
-                      <div className="flex items-center space-x-2">
-                        <Mail size={18} />
-                        <span>Email</span>
-                      </div>
-                    </th>
-                    <th className="px-6 py-4 text-left">
-                      <div className="flex items-center space-x-2">
-                        <Phone size={18} />
-                        <span>Phone</span>
-                      </div>
-                    </th>
-                    <th className="px-6 py-4 text-left">
-                      <div className="flex items-center space-x-2">
-                        <Calendar size={18} />
-                        <span>Date of Birth</span>
-                      </div>
-                    </th>
+                    <th className="px-6 py-4 text-left">User Type</th>
+                    <th className="px-6 py-4 text-left">Username</th>
+                    <th className="px-6 py-4 text-left">Full Name</th>
+                    <th className="px-6 py-4 text-left">Email</th>
+                    <th className="px-6 py-4 text-left">Phone</th>
+                    <th className="px-6 py-4 text-left">Date of Birth</th>
                     <th className="px-6 py-4 text-left">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {birthdays.map((user, index) => (
                     <tr key={index} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-1 rounded-full text-sm ${
+                          user.type === 'Realtor' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+                        }`}>
+                          {user.type}
+                        </span>
+                      </td>
                       <td className="px-6 py-4">{user.username}</td>
                       <td className="px-6 py-4">{`${user.firstName} ${user.lastName}`}</td>
                       <td className="px-6 py-4">{user.email}</td>
                       <td className="px-6 py-4">{user.phone}</td>
                       <td className="px-6 py-4">
-                        {new Date(user.dob).toLocaleDateString('en-GB')}
+                        {new Date(user.dateOfBirth).toLocaleDateString('en-GB')}
                       </td>
                       <td className="px-6 py-4">
                         <button

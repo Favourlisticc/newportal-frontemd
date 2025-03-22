@@ -8,7 +8,7 @@ const ProtectedRoute = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    document.title = "Baay Realtors - Super Admin Portal";
+    document.title = "Baay Realty - Super Admin Portal";
   }, []);
 
   if (!jwt) {

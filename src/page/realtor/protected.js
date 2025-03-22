@@ -8,7 +8,7 @@ const DashboardLayout = ({ children }) => {
   const jwt = localStorage.getItem("realtorJwt");
 
   useEffect(() => {
-    document.title = "Baay Realtors - Realtor Portal";
+    document.title = "Baay Realty - Realtor Portal";
   }, []);
 
   const toggleSidebar = () => {

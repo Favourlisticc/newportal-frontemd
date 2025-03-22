@@ -39,7 +39,7 @@ const RegisterForm = () => {
 
 
    useEffect(() => {
-        document.title = "Baay Realtors - Realtor Registration";
+        document.title = "Baay Realty - Realtor Registration";
       }, []);
 
   // Add useEffect to set initial referrer value
