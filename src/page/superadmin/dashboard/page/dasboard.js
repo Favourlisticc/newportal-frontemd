@@ -133,16 +133,16 @@ const AdminDashboard = () => {
       <TodaysBirthdays />
 
       {/* Earnings Table */}
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden mt-6 max-sm:w-screen max-sm:p-3">
+      <div className="bg-white  rounded-xl opacity-100 shadow-lg overflow-hidden mt-6 max-sm:w-screen max-sm:p-3">
         <div className="p-4 md:p-6 bg-[#002657]">
-          <h3 className="text-base md:text-lg font-semibold text-[#E5B30F]">
+          <h3 className="text-base md:text-lg font-semibold  text-[#E5B30F]">
             <FaFileContract className="inline mr-2" />
             Last 15 Earning History
           </h3>
         </div>
         
         {error ? (
-          <div className="p-4 md:p-6 text-center text-red-500">
+          <div className="p-4 md:p-6 text-center font-medium text-red-500">
             {error}
           </div>
         ) : isLoading ? (

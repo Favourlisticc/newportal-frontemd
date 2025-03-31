@@ -657,78 +657,101 @@ const SignupForm = () => {
       // Show form download prompt
       const { subscriptionForm } = selectedProperty;
       
+     // Inside the handleFinalSubmit function, modify the Swal.fire section:
+
+Swal.fire({
+  title: 'Download Subscription Form',
+  html: `
+    <p> Send your payment screenshot to our WhatsApp before moving to the dashboard</p> 
+    <div style="margin: 20px 0;">
+      <a href="https://wa.me/+2348071260398?text=Hello,%20I%20have%20completed%20my%20property%20registration%20for%20${selectedProperty.propertyName}" target="_blank" id="whatsapp-link" class="swal2-confirm swal2-styled" style="background-color: #25D366; text-decoration: none; display: inline-block; padding: 10px 20px;">
+        WhatsApp Us
+      </a>
+    </div>
+    <p style="color: #FF0000; font-weight: bold;">Important: Your property sale will not be approved until you send the completed form!</p>
+    <p style="color: #FF0000; font-weight: bold;">Important: You have to submit the required documents to the WhatsApp number before the "I Have Sent The Files" button can work!</p>
+    <p id="timer-message" style="margin-top: 15px; color: #FF0000; display: none;">Session timeout warning: Please complete this step soon or you may need to restart the process.</p>
+  `,
+  showCancelButton: false,
+  confirmButtonText: 'I Have Sent The Files',
+  confirmButtonColor: '#002657',
+  allowOutsideClick: false,
+  didOpen: () => {
+    // Track if links were clicked
+    let formDownloaded = false;
+    let whatsappClicked = false;
+    
+    document.getElementById('whatsapp-link').addEventListener('click', () => {
+      whatsappClicked = true;
+    });
+    
+    // Disable the confirm button until WhatsApp is clicked
+    const confirmButton = Swal.getConfirmButton();
+    confirmButton.disabled = true;
+    
+    const checkBothClicked = setInterval(() => {
+      if (whatsappClicked) {
+        confirmButton.disabled = false;
+        clearInterval(checkBothClicked);
+      }
+    }, 1000);
+    
+    // Add timeout warnings
+    const timerMessage = document.getElementById('timer-message');
+    
+    // After 60 seconds, show the warning
+    setTimeout(() => {
+      if (!whatsappClicked) {
+        timerMessage.style.display = 'block';
+      }
+    }, 60000); // 1 minute
+    
+    // After 5 minutes, change button color to draw attention
+    setTimeout(() => {
+      if (!whatsappClicked) {
+        confirmButton.style.backgroundColor = '#E5B305';
+        confirmButton.disabled = false; // Enable the button anyway
+        confirmButton.textContent = 'Continue Without Sending Files (Not Recommended)';
+        Swal.getFooter().innerHTML = '<p style="color: #FF0000; font-weight: bold;">Warning: Continuing without sending files may delay your property approval!</p>';
+      }
+    }, 300000); // 5 minutes
+  }
+}).then(async (result) => {
+  if (result.isConfirmed) {
+    try {
+      // Send data to the backend
+      const response = await axios.post('https://newportal-backend.onrender.com/client/signup', userData);
+
+      // Handle backend response
+      const { token, user } = response.data;
+
+      // Store token in localStorage or state management
+      localStorage.setItem('Clienttoken', token);
+      localStorage.setItem('Clientuser', JSON.stringify(user));
+  
       Swal.fire({
-        title: 'Download Subscription Form',
+        title: 'Registration Successful!',
         html: `
-          <p>Please download and fill the subscription form below</p>
-          <p>After filling, send the form and your payment screenshot to our WhatsApp</p>
-          <div style="margin: 20px 0;">
-            <a href="${subscriptionForm}" target="_blank" id="download-form" class="swal2-confirm swal2-styled" style="background-color: #002657; margin-right: 10px; text-decoration: none; display: inline-block; padding: 10px 20px;">
-              Download Form
-            </a>
-            <a href="https://wa.me/+2348071260398?text=Hello,%20I%20have%20completed%20my%20property%20registration%20for%20${selectedProperty.propertyName}" target="_blank" id="whatsapp-link" class="swal2-confirm swal2-styled" style="background-color: #25D366; text-decoration: none; display: inline-block; padding: 10px 20px;">
-              WhatsApp Us
-            </a>
-          </div>
-          <p style="color: #FF0000; font-weight: bold;">Important: Your property sale will not be approved until you send the completed form!</p>
-  
-          <p style="color: #FF0000; font-weight: bold;">Important: You have to submit the require document to the whatsapp number before the "I Have Sent The Files" button can work !</p>
-  
+          Your registration and payment upload for ${selectedProperty.propertyName} was successful.<br>
+          Your payment will be confirmed after 48hrs
+          <span style="color: #E5B305">Check your email for confirmation.</span>
         `,
-        showCancelButton: false,
-        confirmButtonText: 'I Have Sent The Files',
+        icon: 'success',
         confirmButtonColor: '#002657',
-        allowOutsideClick: false,
-        didOpen: () => {
-          // Track if links were clicked
-          let formDownloaded = false;
-          let whatsappClicked = false;
-          
-          document.getElementById('download-form').addEventListener('click', () => {
-            formDownloaded = true;
-          });
-          
-          document.getElementById('whatsapp-link').addEventListener('click', () => {
-            whatsappClicked = true;
-          });
-          
-          // Disable the confirm button until WhatsApp is clicked
-          const confirmButton = Swal.getConfirmButton();
-          confirmButton.disabled = true;
-          
-          const checkBothClicked = setInterval(() => {
-            if (whatsappClicked) {
-              confirmButton.disabled = false;
-              clearInterval(checkBothClicked);
-            }
-          }, 1000);
-        }
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          // Send data to the backend
-          const response = await axios.post('https://newportal-backend.onrender.com/client/signup', userData);
-  
-          // Handle backend response
-          const { token, user } = response.data;
-  
-          // Store token in localStorage or state management
-          localStorage.setItem('Clienttoken', token);
-          localStorage.setItem('Clientuser', JSON.stringify(user));
-      
-          Swal.fire({
-            title: 'Registration Successful!',
-            html: `
-              Your registration and payment upload for ${selectedProperty.propertyName} was successful.<br>
-              Your payment will be confirmed after 48hrs
-              <span style="color: #E5B305">Check your email for confirmation.</span>
-            `,
-            icon: 'success',
-            confirmButtonColor: '#002657',
-          });
-      
-          navigate('/client-dashboard');
-        }
       });
+  
+      navigate('/client-dashboard');
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'There was an error processing your registration. Please try again.';
+      Swal.fire({
+        title: 'Registration Error',
+        text: errorMessage,
+        icon: 'error',
+        confirmButtonColor: '#002657',
+      });
+    }
+  }
+});
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || error.message || 'Registration failed. Please try again.';
