@@ -166,9 +166,11 @@ const RegisterForm = () => {
     }
   };
 
+  console.log(formData);
+
   const completeRegistration = async () => {
     try {
-      const response = await fetch("https://newportal-backend.onrender.com/auth/realtor/register", {
+      const response = await fetch("http://localhost:3005/auth/realtor/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -375,6 +377,8 @@ const RegisterForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+
+    console.log(formData)
     
     setLoading(true);
     try {
