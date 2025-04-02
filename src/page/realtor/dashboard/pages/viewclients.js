@@ -94,7 +94,6 @@ const ViewClients = () => {
                     <th className="border p-2">No</th>
                     <th className="border p-2">First Name</th>
                     <th className="border p-2">Last Name</th>
-                    <th className="border p-2">Username</th>
                     <th className="border p-2">Email</th>
                     <th className="border p-2">Phone</th>
                   
@@ -106,7 +105,6 @@ const ViewClients = () => {
                       <td className="border p-2">{index + 1}</td>
                       <td className="border p-2">{client.firstName}</td>
                       <td className="border p-2">{client.lastName}</td>
-                      <td className="border p-2">{client.username}</td>
                       <td className="border p-2">{client.email}</td>
                       <td className="border p-2">{client.phone}</td>
                     

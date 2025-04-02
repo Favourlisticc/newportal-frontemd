@@ -4,6 +4,7 @@ import { FaHome, FaTimes, FaUser, FaMoneyBill, FaCoins, FaBirthdayCake, FaBuildi
 import { RiAccountPinBoxFill } from "react-icons/ri";
 import { MdSupervisorAccount } from "react-icons/md";
 import logo from "../../../public/BR (2).jpg"
+import { FiActivity } from "react-icons/fi";
 
 const AdminSidebar = ({ isSidebarOpen, toggleSidebar  }) => {
   const location = useLocation();
@@ -80,6 +81,11 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar  }) => {
       name: 'Withdrawal',
       path: '/admin-dashboard/withdrawal',
       icon: <FaWallet className="h-5 w-5 mr-3" />
+    },
+    {
+      name: 'Activity',
+      path: '/admin-dashboard/activity-log',
+      icon: <FiActivity className="h-5 w-5 mr-3" />
     },
     {
       name: 'FAQ',

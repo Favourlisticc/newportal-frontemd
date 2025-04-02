@@ -4,6 +4,22 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaEdit } from "react-icons/fa"; // Import edit icon
 
+
+const logActivity = async (userId, userModel, activityType, description, metadata = {}) => {
+  try {
+    await axios.post('https://newportal-backend.onrender.com/activity/log-activity', {
+      userId,
+      userModel,
+      role: userModel.toLowerCase(), // 'realtor' or 'client'
+      activityType,
+      description,
+      metadata
+    });
+  } catch (error) {
+    console.error('Error logging activity:', error);
+  }
+};
+
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("editProfile");
   const [user, setUser] = useState(null);
@@ -75,21 +91,20 @@ const ProfilePage = () => {
       toast.error("Please select an image");
       return;
     }
-
+  
     setLoading(true);
     const formData = new FormData();
     formData.append("file", selectedImage);
     formData.append("upload_preset", "giweexpv");
-
+  
     try {
       const cloudinaryResponse = await axios.post(
         "https://api.cloudinary.com/v1_1/dwpoik1jm/image/upload",
         formData
       );
-
+  
       const imageUrl = cloudinaryResponse.data.secure_url;
-
-      // Update user profile image in the database
+  
       const response = await axios.put(
         "https://newportal-backend.onrender.com/realtor/update-profile-image/",
         {
@@ -97,12 +112,20 @@ const ProfilePage = () => {
           image: imageUrl,
         }
       );
-
-      // Update user state and localStorage
+  
+      // Log the activity
+      await logActivity(
+        user._id,
+        'Realtor',
+        'profile_update',
+        'Realtor updated profile picture',
+        {}
+      );
+  
       const updatedUser = { ...user, profileImage: imageUrl };
       setUser(updatedUser);
       localStorage.setItem("realtorData", JSON.stringify(updatedUser));
-
+  
       toast.success("Profile image updated successfully");
     } catch (error) {
       console.log(error);
@@ -115,9 +138,7 @@ const ProfilePage = () => {
   const handleEditProfile = async (e) => {
     e.preventDefault();
     setLoading(true);
-
-    console.log(user)
-
+  
     try {
       const response = await axios.put(
         `https://newportal-backend.onrender.com/realtor/edit-profile`,
@@ -126,14 +147,26 @@ const ProfilePage = () => {
           ...user,
         }
       );
-
-      // Update user state and localStorage
+  
+      // Log the activity
+      await logActivity(
+        user._id,
+        'Realtor',
+        'profile_update',
+        'Realtor updated profile information',
+        {
+          updatedFields: Object.keys(user).filter(
+            key => user[key] !== parsedData[key]
+          )
+        }
+      );
+  
       const updatedUser = response.data.user;
       setUser(updatedUser);
       localStorage.setItem("realtorData", JSON.stringify(updatedUser));
-
+  
       toast.success("Profile updated successfully");
-      setIsEditing(false); // Disable edit mode after saving
+      setIsEditing(false);
     } catch (error) {
       console.log(error);
       toast.error("Error updating profile");
@@ -144,20 +177,19 @@ const ProfilePage = () => {
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
-
-    // Validate password
+  
     if (newPassword.length < 8) {
       setPasswordError("Password must be at least 8 characters long");
       return;
     }
-
+  
     if (newPassword !== confirmPassword) {
       setPasswordError("Passwords do not match");
       return;
     }
-
+  
     setLoading(true);
-
+  
     try {
       await axios.put(
         `https://newportal-backend.onrender.com/realtor/change-password`,
@@ -166,7 +198,16 @@ const ProfilePage = () => {
           newPassword: newPassword,
         }
       );
-
+  
+      // Log the activity
+      await logActivity(
+        user._id,
+        'Realtor',
+        'password_change',
+        'Realtor changed password',
+        {}
+      );
+  
       toast.success("Password updated successfully");
       setNewPassword("");
       setConfirmPassword("");

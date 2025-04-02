@@ -7,6 +7,8 @@ import { NavLink } from 'react-router-dom';
 import { BsFillHousesFill } from "react-icons/bs";
 import logo from "../../../../public/BR (2).jpg";
 
+import { FiActivity } from "react-icons/fi";
+
 const RealtorSidebar = ({ isSidebarOpen, closeSidebar }) => {
   const [openMenus, setOpenMenus] = useState({});
 
@@ -248,6 +250,19 @@ const RealtorSidebar = ({ isSidebarOpen, closeSidebar }) => {
             >
               <FaQuestionCircle className="h-6 w-6 mr-3" />
               FAQ
+            </NavLink>
+          </li>
+
+          <li>
+            <NavLink
+              to="/realtor-dashboard/activity-log"
+              className={({ isActive }) =>
+                `flex items-center p-3 ${hoverStyle} ${isActive ? activeStyle : ''}`
+              }
+              onClick={closeSidebar}
+            >
+              <FiActivity className="h-6 w-6 mr-3" />
+              Activity Log
             </NavLink>
           </li>
 

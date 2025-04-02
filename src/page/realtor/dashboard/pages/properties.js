@@ -1,6 +1,21 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
+const logActivity = async (userId, userModel, activityType, description, metadata = {}) => {
+  try {
+    await axios.post('https://newportal-backend.onrender.com/activity/log-activity', {
+      userId,
+      userModel,
+      role: userModel.toLowerCase(), // 'realtor' or 'client'
+      activityType,
+      description,
+      metadata
+    });
+  } catch (error) {
+    console.error('Error logging activity:', error);
+  }
+};
+
 const App = () => {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,10 +43,24 @@ const App = () => {
     property.propertyName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Handle "View More Details" click
-  const handleViewDetails = (property) => {
-    setSelectedProperty(property);
-  };
+  // Add this to the handleViewDetails function
+const handleViewDetails = (property) => {
+  const realtorData = JSON.parse(localStorage.getItem("realtorData"));
+  
+  // Log the activity
+  logActivity(
+    realtorData._id,
+    'Realtor',
+    'property_view',
+    'Realtor viewed property details',
+    {
+      propertyId: property._id,
+      propertyName: property.propertyName
+    }
+  );
+
+  setSelectedProperty(property);
+};
 
   // Close the details modal
   const handleCloseDetails = () => {

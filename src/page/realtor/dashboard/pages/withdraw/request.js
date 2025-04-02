@@ -4,6 +4,21 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { TailSpin } from "react-loader-spinner";
 
+const logActivity = async (userId, userModel, activityType, description, metadata = {}) => {
+  try {
+    await axios.post('https://newportal-backend.onrender.com/activity/log-activity', {
+      userId,
+      userModel,
+      role: userModel.toLowerCase(), // 'realtor' or 'client'
+      activityType,
+      description,
+      metadata
+    });
+  } catch (error) {
+    console.error('Error logging activity:', error);
+  }
+};
+
 const WithdrawalPage = () => {
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,22 +37,22 @@ const WithdrawalPage = () => {
   const handleWithdrawal = async (e) => {
     e.preventDefault();
     const numericAmount = Number(amount.replace(/,/g, ""));
-
+  
     if (numericAmount < 4000) {
       toast.error("Minimum withdrawal is ₦4,000");
       return;
     }
-
+  
     if (numericAmount > balance) {
       toast.error("Insufficient balance");
       return;
     }
-
+  
     setLoading(true);
     try {
       const storedRealtorData = localStorage.getItem("realtorData");
       const parsedData = JSON.parse(storedRealtorData);
-
+  
       const response = await axios.post("https://newportal-backend.onrender.com/realtor/withdrawal", {
         userId: parsedData._id,
         amount: numericAmount,
@@ -47,7 +62,18 @@ const WithdrawalPage = () => {
         email: parsedData.email,
         phone: parsedData.phone,
       });
-
+  
+      // Log the activity
+      await logActivity(
+        parsedData._id,
+        'Realtor',
+        'withdrawal_request',
+        'Realtor requested withdrawal',
+        {
+          amount: numericAmount
+        }
+      );
+  
       toast.success("Withdrawal request submitted successfully!");
       setAmount("");
     } catch (error) {

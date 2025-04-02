@@ -49,6 +49,7 @@
     "react-toastify": "^11.0.3",
     "recharts": "^2.15.1",
     "shadcn": "^2.1.8",
+    "socket.io-client": "^4.8.1",
     "svg-captcha": "^1.4.0",
     "sweetalert2": "^11.15.10",
     "tailwind-merge": "^2.6.0",

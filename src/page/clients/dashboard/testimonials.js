@@ -6,27 +6,44 @@ import Swal from 'sweetalert2';
 import { FaSpinner } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
+import axios from 'axios';
+
+const logActivity = async (userId, userModel, activityType, description, metadata = {}) => {
+  try {
+    await axios.post('https://newportal-backend.onrender.com/activity/log-activity', {
+      userId,
+      userModel,
+      role: userModel.toLowerCase(), // 'realtor' or 'client'
+      activityType,
+      description,
+      metadata
+    });
+  } catch (error) {
+    console.error('Error logging activity:', error);
+  }
+};
+
 const AddTestimonials = () => {
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-
+  
     try {
-      const realtorData = JSON.parse(localStorage.getItem("realtorData"));
+      const realtorData = JSON.parse(localStorage.getItem("Clientuser"));
       if (!realtorData) {
         toast.error("Realtor data not found. Please log in again.");
         return;
       }
-
+  
       const testimonialData = {
         ...data,
         realtorId: realtorData._id,
         realtorName: realtorData.firstName + " " + realtorData.lastName,
         realtorEmail: realtorData.email,
       };
-
+  
       const response = await fetch('https://newportal-backend.onrender.com/realtor/testimonials/submit', {
         method: 'POST',
         headers: {
@@ -34,11 +51,22 @@ const AddTestimonials = () => {
         },
         body: JSON.stringify(testimonialData),
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to submit testimonial');
       }
-
+  
+      // Log the activity
+      await logActivity(
+        realtorData._id,
+        'client',
+        'testimonial_submission',
+        'You submitted a testimonial',
+        {
+          propertyPurchased: data.propertypurchased
+        }
+      );
+  
       Swal.fire({
         icon: 'success',
         title: 'Success!',

@@ -5,6 +5,7 @@ import { RiAccountPinBoxFill } from "react-icons/ri";
 import { MdSupervisorAccount } from "react-icons/md";
 import { MdGppGood } from "react-icons/md";
 import logo from "../../../public/BR (2).jpg";
+import { FiActivity } from "react-icons/fi";
 
 const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
   const location = useLocation();
@@ -92,6 +93,11 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
         { name: 'View Properties', path: '/superadmin-dashboard/view-properties' }
       ]
     },
+    {
+          name: 'Activity',
+          path: '/superadmin-dashboard/activity-log',
+          icon: <FiActivity className="h-5 w-5 mr-3" />
+        },
     {
       name: 'Messages',
       path: '/superadmin-dashboard/messages',

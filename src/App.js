@@ -24,6 +24,7 @@ import SuperViewMessages from "./page/superadmin/dashboard/page/messages.js"
 import SuperViewrealtors from "./page/superadmin/dashboard/page/view-realtors.js"
 import AdminManagement from "./page/superadmin/dashboard/page/AdminManagement.js";
 import TestimonialsManagement from "./page/superadmin/dashboard/page/testimonials.js";
+import SuperAdminActivity from "./page/superadmin/dashboard/page/activity.js";
 
 import SuperAdminProtectedRoute from "./page/superadmin/protexted.js";
 
@@ -48,6 +49,7 @@ import  AddPropertyForm from "./page/admin/dashboard/page/properties/add-propert
 import PropertyList from "./page/admin/dashboard/page/properties/view-properties.js"
 import ViewMessages from "./page/admin/dashboard/page/messages.js"
 import Viewrealtors from "./page/admin/dashboard/page/view-realtors.js"
+import AdminActivity from "./page/admin/dashboard/page/activity.js"
 
 import AdminProtectedRoute from "./page/admin/protexted.js";
 
@@ -70,6 +72,7 @@ import WithdrawalPage from "./page/realtor/dashboard/pages/withdraw/request.js";
 import Properties from "./page/realtor/dashboard/pages/properties.js"
 import AddTestimonials from "./page/realtor/dashboard/pages/AddTestimonials.js";
 import Support from "./page/realtor/dashboard/pages/support.js"
+import ActivityPage from "./page/realtor/dashboard/pages/activity.js";
 
 import ProtectedRoute from "./page/realtor/protected.js";
 
@@ -85,6 +88,7 @@ import ClientProtectedRoute from "./page/clients/auth/protected.js";
 import ClientPurchaseHistory from "./page/clients/dashboard/PurchaseRecord.js";
 import RemRemindersTable from "./page/clients/dashboard/unsettled-sales.js"
 import ClientSupport from "./page/clients/dashboard/support.js"
+import ClientActivity from "./page/clients/dashboard/activity.js"
 
 import ClientFAq from "./page/clients/dashboard/faq.js";
 import ClientTestimonials from "./page/clients/dashboard/testimonials.js"
@@ -117,6 +121,7 @@ function App() {
           <Route path="properties" element={<Properties />} />
           <Route path="add-testimonials" element={<AddTestimonials />} />
           <Route path="support" element={<Support />} />
+          <Route path="activity-log" element={<ActivityPage />} />
         </Route>
 
          {/* SuperAdmin Routes */}
@@ -162,6 +167,7 @@ function App() {
           <Route path="view-client" element={<SuperViewClient />} />
 
           <Route path="testimonials" element={<TestimonialsManagement />} />
+          <Route path="activity-log" element={<SuperAdminActivity />} />
         </Route>
 
 
@@ -203,6 +209,8 @@ function App() {
 
           <Route path="view-realtors" element={<Viewrealtors />} />
           <Route path="view-client" element={<ViewClient />} />
+
+          <Route path="activity-log" element={<AdminActivity />} />
         </Route>
 
         <Route path="/client/signin/:referralId" element={<RegisterForm />} />
@@ -221,6 +229,7 @@ function App() {
           <Route path="add-testimonials" element={<ClientTestimonials />} />
           <Route path="upload" element={<DataUploadPage />} />
           <Route path="contact-support" element={<ClientMessageSupport />} />
+          <Route path="activity-log" element={<ClientActivity />} />
           
         </Route>
       </Routes>

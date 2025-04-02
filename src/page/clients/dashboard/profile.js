@@ -3,6 +3,21 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import { FiEdit, FiSave, FiLock, FiUser } from 'react-icons/fi';
 
+const logActivity = async (userId, userModel, activityType, description, metadata = {}) => {
+  try {
+    await axios.post('https://newportal-backend.onrender.com/activity/log-activity', {
+      userId,
+      userModel,
+      role: userModel.toLowerCase(), // 'realtor' or 'client'
+      activityType,
+      description,
+      metadata
+    });
+  } catch (error) {
+    console.error('Error logging activity:', error);
+  }
+};
+
 const Profile = () => {
   const [clientData, setClientData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -89,9 +104,26 @@ const Profile = () => {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+  
     try {
-      const response = await axios.put(`https://newportal-backend.onrender.com/client/profile/${clientData._id}`, formData);
+      const response = await axios.put(
+        `https://newportal-backend.onrender.com/client/profile/${clientData._id}`, 
+        formData
+      );
+      
+      // Log the activity
+      await logActivity(
+        clientData._id,
+        'client',
+        'profile_update',
+        'You updated your profile information',
+        {
+          updatedFields: Object.keys(formData).filter(
+            key => formData[key] !== clientData[key]
+          )
+        }
+      );
+  
       setClientData(response.data);
       localStorage.setItem('Clientuser', JSON.stringify(response.data));
       Swal.fire({
@@ -115,7 +147,7 @@ const Profile = () => {
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+  
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       Swal.fire({
         icon: 'error',
@@ -125,12 +157,24 @@ const Profile = () => {
       setLoading(false);
       return;
     }
-
+  
     try {
-      await axios.put(`https://newportal-backend.onrender.com/client/password/${clientData._id}`, {
-        currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword,
-      });
+      await axios.put(
+        `https://newportal-backend.onrender.com/client/password/${clientData._id}`, {
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        }
+      );
+  
+      // Log the activity
+      await logActivity(
+        clientData._id,
+        'client',
+        'password_change',
+        'You changed password',
+        {}
+      );
+  
       Swal.fire({
         icon: 'success',
         title: 'Password Updated!',

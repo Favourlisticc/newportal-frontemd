@@ -20,6 +20,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { to: "/client-dashboard/contact-support", icon: FaRegBuilding, text: "Message Support" },
     { to: "/client-dashboard/add-testimonials", icon: FaFileAlt, text: "Testimonials" },
     { to: "/client-dashboard/faq", icon: FaQuestionCircle, text: "FAQ" },
+    { to: "/client-dashboard/activity-log", icon: FiActivity, text: "Activity Log" },
     { to: "/client-dashboard/support", icon: FaFileAlt, text: "Support" },
   ];
 

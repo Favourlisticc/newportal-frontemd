@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { ArrowRightOnRectangleIcon, Bars3Icon } from "@heroicons/react/24/outline";
+import { ArrowRightOnRectangleIcon, Bars3Icon, BellIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
+import io from 'socket.io-client';
 
 const Navbar = ({ toggleSidebar }) => {
   const [userData, setUserData] = useState(null);
   const [birthdayMessage, setBirthdayMessage] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
     const storedData = localStorage.getItem("realtorData");
@@ -12,17 +17,60 @@ const Navbar = ({ toggleSidebar }) => {
     if (storedData) {
       const user = JSON.parse(storedData);
       setUserData(user);
+      initializeSocket(user);
+    }
+  }, []);
 
-      // Fetch birthday message if today is the user's birthday
+  // In your realtor's Navbar component
+const initializeSocket = (user) => {
+  console.log("Initializing socket for realtor:", user._id);
+  
+  const newSocket = io('https://newportal-backend.onrender.com', {
+    withCredentials: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+  });
+
+  // Add more detailed logging
+  newSocket.on('connect', () => {
+    console.log('Socket connected successfully');
+    console.log('Socket ID:', newSocket.id);
+    
+    newSocket.emit('authenticate', { 
+      userId: user._id, 
+      userType: 'realtor' 
+    });
+    
+    console.log('Sent authentication:', {
+      userId: user._id,
+      userType: 'realtor'
+    });
+  });
+
+  // Add error listeners
+  newSocket.on('error', (error) => {
+    console.error('Socket error:', error);
+  });
+
+  newSocket.on('connect_error', (error) => {
+    console.error('Socket connection error:', error);
+  });
+
+  // Add this to verify notifications are being received
+  newSocket.onAny((event, ...args) => {
+    console.log(`Received socket event: ${event}`, args);
+  });
+
+  // ... rest of your socket code
+};
+
+  useEffect(() => {
+    if (userData) {
+      // Check for birthday
       const today = new Date();
-      const userDob = new Date(user.dob);
-
-      if (
-        today.getMonth() === userDob.getMonth() &&
-        today.getDate() === userDob.getDate()
-      ) {
-        axios
-          .get(`https://newportal-backend.onrender.com/realtor/birthday-message?userId=${user._id}`)
+      const userDob = new Date(userData.dob);
+      if (today.getMonth() === userDob.getMonth() && today.getDate() === userDob.getDate()) {
+        axios.get(`https://newportal-backend.onrender.com/realtor/birthday-message?userId=${userData._id}`)
           .then((response) => {
             if (response.data.message) {
               setBirthdayMessage(response.data.message);
@@ -33,14 +81,76 @@ const Navbar = ({ toggleSidebar }) => {
           });
       }
     }
-  }, []);
+  }, [userData]);
 
-  console.log(userData)
+  const handleLogout = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("realtorData"));
+    
+      // Log activity
+      await axios.post('https://newportal-backend.onrender.com/activity/log-activity', {
+        userId: user._id,
+        userModel: 'Realtor',
+        role: 'realtor',
+        activityType: 'logout',
+        description: 'Realtor logged out',
+        metadata: {
+          action: 'manual_logout',
+          username: user.username
+        }
+      });
+  
+      // Disconnect socket if it exists
+      if (socket) {
+        socket.disconnect();
+      }
+      
+      localStorage.removeItem("realtorData");
+      localStorage.removeItem("realtorJwt");
+      window.location.href = "/realtor/login";
+    } catch (error) {
+      console.error("Error during logout:", error);
+      localStorage.removeItem("realtorData");
+      localStorage.removeItem("realtorJwt");
+      window.location.href = "/realtor/login";
+    }
+  };
 
-  const handleLogout = () => {
-    localStorage.removeItem("realtorData");
-    localStorage.removeItem("realtorJwt");
-    window.location.href = "/realtor/login"; // Update with your login route
+  const handleNotificationClick = (notification) => {
+    // Mark notification as read
+    setNotifications(prev => 
+      prev.map(n => n.id === notification.id ? {...n, read: true} : n)
+    );
+    setUnreadCount(prev => Math.max(0, prev - 1));
+    
+    // Handle different notification types
+    switch(notification.type) {
+      case 'fund_approved':
+      case 'fund_rejected':
+        window.location.href = '/realtor/dashboard/funds';
+        break;
+      case 'withdrawal_approved':
+      case 'withdrawal_rejected':
+        window.location.href = '/realtor/dashboard/withdrawals';
+        break;
+      case 'testimonial_approved':
+        window.location.href = '/realtor/dashboard/testimonials';
+        break;
+      case 'new_property':
+        window.location.href = '/realtor/properties';
+        break;
+      case 'support_reply':  // Make sure this matches exactly what the server sends
+        window.location.href = `/realtor/support/tickets/${notification.ticketId}`;
+        break;
+      case 'direct_commission':
+      case 'indirect_commission':
+        window.location.href = `/realtor/commissions/${notification.purchaseId}`;
+        break;
+      default:
+        window.location.href = '/realtor/dashboard';
+    }
+    
+    setShowNotifications(false);
   };
 
   if (!userData) return null;
@@ -48,7 +158,7 @@ const Navbar = ({ toggleSidebar }) => {
   return (
     <nav className="bg-white border-b border-gray-200 px-4 py-3">
       <div className="flex items-center justify-between mx-auto">
-        {/* Toggle Sidebar Button (Visible on Mobile) */}
+        {/* Toggle Sidebar Button */}
         <button
           onClick={toggleSidebar}
           className="md:hidden text-[#002657] hover:text-[#E5B305] transition-colors"
@@ -92,6 +202,65 @@ const Navbar = ({ toggleSidebar }) => {
           </div>
         )}
 
+        {/* Notification Bell */}
+        <div className="relative">
+          <button 
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="text-[#002657] hover:text-[#E5B305] transition-colors relative"
+          >
+            <BellIcon className="h-6 w-6" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                {unreadCount}
+              </span>
+            )}
+          </button>
+          
+          {/* Notification Dropdown */}
+          {showNotifications && (
+            <div className="absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg z-50 border border-gray-200">
+              <div className="py-2 px-3 bg-[#002657] text-white font-semibold flex justify-between">
+                <span>Notifications</span>
+                {unreadCount > 0 && (
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setNotifications(prev => prev.map(n => ({...n, read: true})));
+                      setUnreadCount(0);
+                    }}
+                    className="text-xs text-[#E5B305] hover:underline"
+                  >
+                    Mark all as read
+                  </button>
+                )}
+              </div>
+              <div className="max-h-60 overflow-y-auto">
+                {notifications.length > 0 ? (
+                  notifications.map((notification) => (
+                    <div 
+                      key={notification.id}
+                      onClick={() => handleNotificationClick(notification)}
+                      className={`p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
+                        !notification.read ? 'bg-blue-50' : ''
+                      }`}
+                    >
+                      <div className="font-medium text-gray-800">{notification.title}</div>
+                      <div className="text-sm text-gray-600">{notification.message}</div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {new Date(notification.timestamp).toLocaleString()}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-4 text-center text-gray-500">
+                    No notifications
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+        
         {/* Logout Button */}
         <button
           onClick={handleLogout}
@@ -100,14 +269,6 @@ const Navbar = ({ toggleSidebar }) => {
           <ArrowRightOnRectangleIcon className="h-6 w-6" />
           <span className="hidden md:inline font-medium">Logout</span>
         </button>
-      </div>
-
-      {/* Mobile View User Info */}
-      <div className="md:hidden mt-2">
-        <p className="text-gray-800 font-semibold text-center">
-          {userData.firstName} {userData.lastName}
-        </p>
-        <p className="text-gray-500 text-sm text-center">@{userData.username}</p>
       </div>
     </nav>
   );

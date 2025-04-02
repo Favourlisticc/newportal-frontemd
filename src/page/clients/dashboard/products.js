@@ -4,6 +4,21 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import Modal from 'react-modal';
 
+const logActivity = async (userId, userModel, activityType, description, metadata = {}) => {
+  try {
+    await axios.post('https://newportal-backend.onrender.com/activity/log-activity', {
+      userId,
+      userModel,
+      role: userModel.toLowerCase(), // 'realtor' or 'client'
+      activityType,
+      description,
+      metadata
+    });
+  } catch (error) {
+    console.error('Error logging activity:', error);
+  }
+};
+
 // Set the app element for accessibility
 Modal.setAppElement('#root');
 
@@ -66,11 +81,25 @@ const Products = () => {
     setFilteredProperties(filtered);
   }, [searchQuery, properties]);
 
-  // Handle view button click
-  const handleViewClick = (property) => {
-    setSelectedProperty(property);
-    setIsViewModalOpen(true);
-  };
+ // Add this to the handleViewClick function
+const handleViewClick = (property) => {
+  const clientData = JSON.parse(localStorage.getItem('Clientuser'));
+  
+  // Log the activity
+  logActivity(
+    clientData._id,
+    'Client',
+    'property_view',
+    'Client viewed property details',
+    {
+      propertyId: property._id,
+      propertyName: property.propertyName
+    }
+  );
+
+  setSelectedProperty(property);
+  setIsViewModalOpen(true);
+};
 
   // Handle buy now button click
   const handleBuyNowClick = (property) => {
@@ -98,7 +127,7 @@ const Products = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+  
     try {
       // Upload proofOfPayment to Cloudinary
       const proofOfPaymentData = new FormData();
@@ -108,10 +137,24 @@ const Products = () => {
         'https://api.cloudinary.com/v1_1/dwpoik1jm/image/upload',
         proofOfPaymentData
       );
-
+  
       // Get client data from localStorage
       const clientData = JSON.parse(localStorage.getItem('Clientuser'));
-
+  
+      // Log the activity
+      await logActivity(
+        clientData._id,
+        'Client',
+        'property_purchase',
+        'Client initiated property purchase',
+        {
+          propertyId: selectedProperty._id,
+          propertyName: selectedProperty.propertyName,
+          amount: formData.amount,
+          paymentMethod: formData.paymentMethod
+        }
+      );
+  
       // Prepare purchase data
       const purchaseData = {
         client: clientData._id,
@@ -129,17 +172,17 @@ const Products = () => {
         propertyName: selectedProperty.propertyName,
         paymentMethod: formData.paymentMethod,
       };
-
+  
       // Send purchase data to the backend
       await axios.post('https://newportal-backend.onrender.com/client/purchases', purchaseData);
-
+  
       // Show success message
       Swal.fire({
         icon: 'success',
         title: 'Payment Successful!',
         text: 'Your payment proof has been sent successfully. We will get back to you shortly.',
       });
-
+  
       // Close the modal
       setIsBuyModalOpen(false);
     } catch (error) {

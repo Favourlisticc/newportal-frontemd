@@ -4,6 +4,21 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Calendar, File, DollarSign, Loader2 } from "lucide-react";
 
+const logActivity = async (userId, userModel, activityType, description, metadata = {}) => {
+  try {
+    await axios.post('https://newportal-backend.onrender.com/activity/log-activity', {
+      userId,
+      userModel,
+      role: userModel.toLowerCase(), // 'realtor' or 'client'
+      activityType,
+      description,
+      metadata
+    });
+  } catch (error) {
+    console.error('Error logging activity:', error);
+  }
+};
+
 const FundNowPage = () => {
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(null);
@@ -56,6 +71,18 @@ const FundNowPage = () => {
         paymentDate,
         proofImage: cloudinaryResponse.data.secure_url
       });
+  
+      // Log the activity
+      await logActivity(
+        parsedData._id,
+        'Realtor',
+        'fund_upload',
+        'Realtor uploaded funding proof',
+        {
+          amount: amount,
+          paymentDate: paymentDate
+        }
+      );
   
       toast.success("Funding request submitted successfully!");
       // Reset form
