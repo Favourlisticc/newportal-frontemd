@@ -70,7 +70,7 @@ const ContactSupport = () => {
   const handleReply = async (ticketId) => {
     if (!newMessage.trim()) return;
     try {
-      const response = await axios.post(`https://newportal-backend.onrender.com/realtor/support/${ticketId}/messages`, {
+      const response = await axios.post(`https://newportal-backend.onrender.comrealtor/support/${ticketId}/messages`, {
         content: newMessage
       });
       setTickets(tickets.map(t => 

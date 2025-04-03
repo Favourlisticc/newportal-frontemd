@@ -5,82 +5,104 @@ import axios from "axios";
 import io from 'socket.io-client';
 
 const AdminNavbar = ({ toggleSidebar }) => {
-  const navigate = useNavigate();
-  const [notifications, setNotifications] = useState([]);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const notificationRef = useRef(null);
-  const socketRef = useRef(null);
-  
-  useEffect(() => {
-    // Connect to websocket server
-    socketRef.current = io('https://newportal-backend.onrender.com');
-    
-    // Listen for notifications
-    socketRef.current.on('notification', (notification) => {
-      // Add new notification to the state
-      setNotifications(prev => [notification, ...prev]);
-      setUnreadCount(prevCount => prevCount + 1);
-    });
-    
-    // Clean up on unmount
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
-    };
-  }, []);
-  
-  useEffect(() => {
-    // Handle clicks outside the notification panel
-    function handleClickOutside(event) {
-      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
-        setShowNotifications(false);
-      }
-    }
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+const navigate = useNavigate();
+const [notifications, setNotifications] = useState([]);
+const [showNotifications, setShowNotifications] = useState(false);
+const [unreadCount, setUnreadCount] = useState(0);
+const notificationRef = useRef(null);
+const socketRef = useRef(null);
 
-  const handleLogout = async () => {
-    try {
-      const user = JSON.parse(localStorage.getItem('SuperAdminusername'));
-      
-      // Log activity
-      await axios.post('https://newportal-backend.onrender.com/activity/log-activity', {
-        userId: user._id,
-        userModel: 'SuperAdmin',
-        role: 'superadmin',
-        activityType: 'logout',
-        description: 'SuperAdmin logged out',
-        metadata: {
-          action: 'manual_logout',
-          lastActivity: new Date().toISOString()
-        }
-      });
-  
-      localStorage.removeItem('SuperAdmintoken');
-      localStorage.removeItem('SuperAdminusername');
-      navigate('/admin/login');
-    } catch (error) {
-      console.error('Error logging activity:', error);
-      // Still proceed with logout
-      localStorage.removeItem('SuperAdmintoken');
-      localStorage.removeItem('SuperAdminusername');
-      navigate('/admin/login');
-    }
+// In your AdminNavbar component
+// In your AdminNavbar component
+useEffect(() => {
+  const SOCKET_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://newportal-backend.onrender.com'
+  : 'http://localhost:3005';
+
+const socket = io(SOCKET_URL, {
+  withCredentials: true,
+  reconnection: true
+});
+
+  // Authenticate as admin
+  socket.emit('authenticate', { userType: 'admin' });
+
+  // Listen specifically for admin notifications
+  socket.on('admin_notification', (notification) => {
+    console.log('Received admin notification:', notification);
+    setNotifications(prev => [{
+      ...notification,
+      id: Date.now(),
+      read: false
+    }, ...prev]);
+    setUnreadCount(prev => prev + 1);
+    
+    // Play notification sound
+    new Audio('/notification-sound.mp3').play().catch(e => console.log(e));
+  });
+
+  return () => {
+    socket.disconnect();
   };
-  
-  const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
-    if (!showNotifications) {
-      // Mark notifications as read when opening the panel
-      setUnreadCount(0);
+}, []);
+
+
+useEffect(() => {
+  // Handle clicks outside the notification panel
+  function handleClickOutside(event) {
+    if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+      setShowNotifications(false);
     }
+  }
+  
+  document.addEventListener('mousedown', handleClickOutside);
+  return () => {
+    document.removeEventListener('mousedown', handleClickOutside);
   };
+}, []);
+
+const handleLogout = async () => {
+  try {
+    const user = JSON.parse(localStorage.getItem('Adminusername'));
+    
+    // Log activity
+    await axios.post('https://newportal-backend.onrender.com/activity/log-activity', {
+      userModel: 'Admin',
+      role: 'admin',
+      activityType: 'logout',
+      description: 'Admin logged out',
+      metadata: {
+        action: 'manual_logout',
+        adminType: user.adminType
+      }
+    });
+
+    // Disconnect socket
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+    }
+    
+    localStorage.removeItem('Admintoken');
+    localStorage.removeItem('Adminusername');
+    navigate('/admin/login');
+  } catch (error) {
+    console.error('Error logging activity:', error);
+    localStorage.removeItem('Admintoken');
+    localStorage.removeItem('Adminusername');
+    navigate('/admin/login');
+  }
+};
+
+const toggleNotifications = () => {
+  setShowNotifications(!showNotifications);
+  if (!showNotifications && unreadCount > 0) {
+    // Mark notifications as read when opening the panel
+    setUnreadCount(0);
+    setNotifications(prev => 
+      prev.map(n => ({ ...n, read: true }))
+    );
+  }
+};
   
   const handleNotificationClick = (notification) => {
     // Navigate based on notification type
@@ -100,8 +122,16 @@ const AdminNavbar = ({ toggleSidebar }) => {
       case 'purchase':
         navigate('/admin/purchases');
         break;
+        case 'support':
+          case 'support_message':
+            navigate(`/admin/support-tickets/${notification.ticketId}`);
+            break;
+        case 'registration':
+            navigate(`/admin/clients/${notification.userId}`);
+            break;
       default:
         navigate('/admin/dashboard');
+
     }
     setShowNotifications(false);
   };
@@ -116,7 +146,7 @@ const AdminNavbar = ({ toggleSidebar }) => {
         <FaBars className="h-6 w-6" />
       </button>
 
-      <h1 className="text-xl font-semibold">SuperAdmin Dashboard</h1>
+      <h1 className="text-xl font-semibold">Admin Dashboard</h1>
       
       <div className="flex items-center">
         {/* Notification Bell */}

@@ -78,7 +78,7 @@ const TestimonialsManagement = () => {
   const handleAccept = async (testimonial) => {
     setActionInProgress(testimonial._id);
     try {
-      await axios.post('https://newportal-backend.onrender.com/admin/testimonial/accept', { testimonialId: testimonial._id });
+      await axios.post('http://localhost:3005/admin/testimonial/accept', { testimonialId: testimonial._id });
       toast.success('Testimonial accepted successfully');
       fetchTestimonials();
     } catch (error) {
@@ -92,7 +92,7 @@ const TestimonialsManagement = () => {
   const handleReject = async (testimonialId) => {
     setActionInProgress(testimonialId);
     try {
-      await axios.delete(`https://newportal-backend.onrender.com/admin/testimonial/pending/${testimonialId}`);
+      await axios.delete(`http://localhost:3005/admin/testimonial/pending/${testimonialId}`);
       toast.success('Testimonial rejected successfully');
       setPendingTestimonials(prevTestimonials => 
         prevTestimonials.filter(t => t._id !== testimonialId)

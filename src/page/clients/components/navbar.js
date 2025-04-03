@@ -12,33 +12,89 @@ const Navbar = ({ onToggleSidebar }) => {
   const [birthdayMessage, setBirthdayMessage] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const [socket, setSocket] = useState(null);
+  const [socketInitialized, setSocketInitialized] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("Clientuser");
     if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
-      initializeSocket(parsedUser);
+      try {
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
     }
   }, []);
 
+  useEffect(() => {
+    if (user && !socketInitialized) {
+      initializeSocket(user);
+      setSocketInitialized(true);
+    }
+
+    return () => {
+      if (socket) {
+        console.log('Cleaning up socket');
+        socket.disconnect();
+      }
+    };
+  }, [user, socketInitialized]);
+
   const initializeSocket = (userData) => {
+    if (!userData?._id) {
+      console.error("Cannot initialize socket - user ID missing");
+      return;
+    }
+
+    console.log("Initializing socket for client:", userData._id);
+
     const newSocket = io('https://newportal-backend.onrender.com', {
       withCredentials: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
+      autoConnect: true,
+      transports: ['websocket', 'polling'],
+      query: {
+        userId: userData._id,
+        userType: 'client'
+      }
     });
 
     newSocket.on('connect', () => {
-      console.log('Socket connected');
-      // Authenticate with the server
+      console.log('Socket connected with ID:', newSocket.id);
+      console.log('Authenticating as client:', userData._id);
+      
       newSocket.emit('authenticate', { 
         userId: userData._id, 
-        userType: 'client' 
+        userType: 'client',
+        token: localStorage.getItem("Clienttoken")
       });
     });
 
-    // In your Navbar component's socket initialization
+    newSocket.on('connect_error', (err) => {
+      console.error('Connection error:', err.message);
+    });
+
+    newSocket.on('reconnect_attempt', (attempt) => {
+      console.log(`Reconnection attempt ${attempt}`);
+    });
+
+    newSocket.on('reconnect_error', (err) => {
+      console.error('Reconnection error:', err.message);
+    });
+
+    newSocket.on('authentication_success', (data) => {
+      console.log('Authentication successful:', data);
+    });
+
+    newSocket.on('authentication_error', (err) => {
+      console.error('Authentication failed:', err);
+    });
+
+    newSocket.on('disconnect', (reason) => {
+      console.log('Disconnected:', reason);
+    });
+
     newSocket.on('notification', (notification) => {
       console.log('New notification received:', notification);
       setNotifications(prev => [{
@@ -47,25 +103,13 @@ const Navbar = ({ onToggleSidebar }) => {
         read: false
       }, ...prev]);
       setUnreadCount(prev => prev + 1);
-      
-      // Play notification sound if not muted
-      if (!localStorage.getItem('notificationMuted')) {
-        const audio = new Audio('/notification-sound.mp3');
-        audio.play().catch(e => console.log("Audio play failed:", e));
-      }
-    });
-
-    newSocket.on('disconnect', () => {
-      console.log('Socket disconnected');
-    });
-
-    newSocket.on('connect_error', (err) => {
-      console.error('Socket connection error:', err);
+      new Audio('/notification-sound.mp3').play().catch(console.error);
     });
 
     setSocket(newSocket);
 
     return () => {
+      console.log('Cleaning up socket');
       newSocket.disconnect();
     };
   };

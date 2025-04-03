@@ -276,7 +276,7 @@ const RealtorSidebar = ({ isSidebarOpen, closeSidebar }) => {
               onClick={closeSidebar}
             >
               <FaRegBuilding className="h-6 w-6 mr-3" />
-              Contact
+              Message
             </NavLink>
           </li>
 

@@ -13,23 +13,26 @@ const notificationRef = useRef(null);
 const socketRef = useRef(null);
 
 // In your AdminNavbar component
+// In your AdminNavbar component
 useEffect(() => {
-  // Connect to websocket server
-  const socket = io('https://newportal-backend.onrender.com', {
-    withCredentials: true,
-    reconnection: true,
-    reconnectionAttempts: 5,
-    reconnectionDelay: 1000,
-  });
+  const SOCKET_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://newportal-backend.onrender.com'
+  : 'http://localhost:3005';
 
-  // Authenticate as admin (no userId needed)
+const socket = io(SOCKET_URL, {
+  withCredentials: true,
+  reconnection: true
+});
+
+  // Authenticate as admin
   socket.emit('authenticate', { userType: 'admin' });
 
   // Listen specifically for admin notifications
   socket.on('admin_notification', (notification) => {
+    console.log('Received admin notification:', notification);
     setNotifications(prev => [{
       ...notification,
-      id: Date.now(), // Add temporary ID
+      id: Date.now(),
       read: false
     }, ...prev]);
     setUnreadCount(prev => prev + 1);
@@ -42,7 +45,6 @@ useEffect(() => {
     socket.disconnect();
   };
 }, []);
-
 
 
 useEffect(() => {

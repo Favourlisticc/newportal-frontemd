@@ -17,7 +17,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { to: "/client-dashboard/purchasehistory", icon: MdWorkHistory, text: "Purchase Record" },
     // { to: "/client-dashboard/upload", icon: FiUpload, text: "Data Upload" },
     { to: "/client-dashboard/profile", icon: RiAccountBoxLine, text: "Profile" },
-    { to: "/client-dashboard/contact-support", icon: FaRegBuilding, text: "Message Support" },
+    { to: "/client-dashboard/contact-support", icon: FaRegBuilding, text: "Message" },
     { to: "/client-dashboard/add-testimonials", icon: FaFileAlt, text: "Testimonials" },
     { to: "/client-dashboard/faq", icon: FaQuestionCircle, text: "FAQ" },
     { to: "/client-dashboard/activity-log", icon: FiActivity, text: "Activity Log" },

@@ -21,48 +21,77 @@ const Navbar = ({ toggleSidebar }) => {
     }
   }, []);
 
-  // In your realtor's Navbar component
-const initializeSocket = (user) => {
-  console.log("Initializing socket for realtor:", user._id);
+  const initializeSocket = (user) => {
+    console.log("Initializing socket for realtor:", user._id);
   
-  const newSocket = io('https://newportal-backend.onrender.com', {
-    withCredentials: true,
-    reconnectionAttempts: 5,
-    reconnectionDelay: 1000,
-  });
-
-  // Add more detailed logging
-  newSocket.on('connect', () => {
-    console.log('Socket connected successfully');
-    console.log('Socket ID:', newSocket.id);
-    
-    newSocket.emit('authenticate', { 
-      userId: user._id, 
-      userType: 'realtor' 
+    const newSocket = io('https://newportal-backend.onrender.com', {
+      withCredentials: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      autoConnect: true,
+      transports: ['websocket', 'polling'],
+      query: {
+        userId: user._id,
+        userType: 'realtor'
+      }
     });
-    
-    console.log('Sent authentication:', {
-      userId: user._id,
-      userType: 'realtor'
+  
+    // Connection events with more logging
+    newSocket.on('connect', () => {
+      console.log('Socket connected with ID:', newSocket.id);
+      console.log('Authenticating as realtor:', user._id);
+      
+      newSocket.emit('authenticate', {
+        userId: user._id,
+        userType: 'realtor',
+        token: localStorage.getItem("realtorJwt")
+      });
     });
-  });
-
-  // Add error listeners
-  newSocket.on('error', (error) => {
-    console.error('Socket error:', error);
-  });
-
-  newSocket.on('connect_error', (error) => {
-    console.error('Socket connection error:', error);
-  });
-
-  // Add this to verify notifications are being received
-  newSocket.onAny((event, ...args) => {
-    console.log(`Received socket event: ${event}`, args);
-  });
-
-  // ... rest of your socket code
-};
+  
+    newSocket.on('connect_error', (err) => {
+      console.error('Connection error:', err.message);
+    });
+  
+    newSocket.on('reconnect_attempt', (attempt) => {
+      console.log(`Reconnection attempt ${attempt}`);
+    });
+  
+    newSocket.on('reconnect_error', (err) => {
+      console.error('Reconnection error:', err.message);
+    });
+  
+    newSocket.on('authentication_success', (data) => {
+      console.log('Authentication successful:', data);
+      // The server should send the room information in the response
+      console.log('Current socket rooms:', data.rooms || []);
+    });
+  
+    newSocket.on('authentication_error', (err) => {
+      console.error('Authentication failed:', err);
+    });
+  
+    newSocket.on('disconnect', (reason) => {
+      console.log('Disconnected:', reason);
+    });
+  
+    newSocket.on('notification', (notification) => {
+      console.log('Received notification:', notification);
+      setNotifications(prev => [{
+        ...notification,
+        id: Date.now(),
+        read: false
+      }, ...prev]);
+      setUnreadCount(prev => prev + 1);
+      new Audio('/notification-sound.mp3').play().catch(console.error);
+    });
+  
+    setSocket(newSocket);
+  
+    return () => {
+      console.log('Cleaning up socket');
+      newSocket.disconnect();
+    };
+  };
 
   useEffect(() => {
     if (userData) {
