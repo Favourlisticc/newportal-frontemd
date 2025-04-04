@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
@@ -248,7 +248,7 @@ const countryCodes = [
   { code: '+967', name: 'Yemen' },
   { code: '+260', name: 'Zambia' },
   { code: '+263', name: 'Zimbabwe' },
-];
+  ];
 
 const SignupForm = () => {
   const navigate = useNavigate();
@@ -256,16 +256,20 @@ const SignupForm = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { referralId } = useParams(); // Get the referral ID from URL
-  const [referrerDetails, setReferrerDetails] = useState(null); // Store referrer details
+  const { referralId } = useParams();
+  const [referrerDetails, setReferrerDetails] = useState(null);
   const [resendTimer, setResendTimer] = useState(0);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [otpExpiry, setOtpExpiry] = useState(null);
-  const [currentStep, setCurrentStep] = useState(1); // Track the current step/card
+  const [currentStep, setCurrentStep] = useState(1);
+  const [showOtpScreen, setShowOtpScreen] = useState(false);
+  const [showWhatsappScreen, setShowWhatsappScreen] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const otpRefs = useRef([]);
 
-    useEffect(() => {
-      document.title = "Baay Realty - Client Registration";
-    }, []);
+  useEffect(() => {
+    document.title = "Baay Realty - Client Registration";
+  }, []);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -301,7 +305,6 @@ const SignupForm = () => {
     fetchProperties();
     if (referralId) {
       fetchReferrerDetails(referralId);
-      console.log(referralId);
     }
   }, [referralId]);
 
@@ -331,11 +334,19 @@ const SignupForm = () => {
     return () => clearInterval(interval);
   }, [otpExpiry]);
 
+  useEffect(() => {
+    if (formData.propertyId && properties.length > 0) {
+      const property = properties.find(p => p._id === formData.propertyId);
+      if (property) {
+        setSelectedProperty(property);
+      }
+    }
+  }, [formData.propertyId, properties]);
+
   const fetchProperties = async () => {
     try {
       const response = await axios.get('https://newportal-backend.onrender.com/client/properties');
       setProperties(response.data);
-      console.log(properties);
     } catch (error) {
       toast.error('Failed to fetch properties');
     }
@@ -344,7 +355,7 @@ const SignupForm = () => {
   const fetchReferrerDetails = async (referralId) => {
     try {
       const response = await axios.get(`https://newportal-backend.onrender.com/client/validate-referral/${referralId}`);
-      setReferrerDetails(response.data); // Store referrer details
+      setReferrerDetails(response.data);
     } catch (error) {
       toast.error('Invalid referral code');
       setReferrerDetails(null);
@@ -372,7 +383,28 @@ const SignupForm = () => {
       
       // Auto-focus to next input
       if (value && index < 5) {
-        document.getElementById(`otp-${index + 1}`).focus();
+        otpRefs.current[index + 1].focus();
+      }
+    }
+  };
+
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text');
+    if (/^\d+$/.test(pastedData) && pastedData.length <= 6) {
+      const digits = pastedData.split('');
+      const newOtp = [...otp];
+      
+      for (let i = 0; i < Math.min(digits.length, 6); i++) {
+        newOtp[i] = digits[i];
+      }
+      
+      setOtp(newOtp);
+      
+      // Focus on appropriate input after paste
+      const lastIndex = Math.min(digits.length - 1, 5);
+      if (lastIndex < 5 && digits.length < 6) {
+        otpRefs.current[lastIndex + 1].focus();
       }
     }
   };
@@ -380,7 +412,7 @@ const SignupForm = () => {
   const handleOtpKeyDown = (e, index) => {
     // Move to previous input on backspace
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      document.getElementById(`otp-${index - 1}`).focus();
+      otpRefs.current[index - 1].focus();
     }
   };
 
@@ -390,7 +422,6 @@ const SignupForm = () => {
   const validateStep1 = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     
-
     if (!formData.firstName || !formData.lastName) {
       toast.error('First and Last name are required');
       return false;
@@ -399,10 +430,6 @@ const SignupForm = () => {
       toast.error('Invalid email format');
       return false;
     }
-    // if (!phoneRegex.test(formData.phone)) {
-    //   toast.error('Phone number must be 10 digits');
-    //   return false;
-    // }
     if (!formData.dateOfBirth) {
       toast.error('Date of Birth is required');
       return false;
@@ -473,6 +500,14 @@ const SignupForm = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
+    if (showOtpScreen) {
+      setShowOtpScreen(false);
+      setCurrentStep(3);
+    }
+    if (showWhatsappScreen) {
+      setShowWhatsappScreen(false);
+      setShowOtpScreen(true);
+    }
   };
 
   const sendOtp = async () => {
@@ -481,7 +516,7 @@ const SignupForm = () => {
     setLoading(true);
     try {
       // Send request to generate OTP
-      const response = await axios.post('https://newportal-backend.onrender.com/client/send-otp', {
+      await axios.post('https://newportal-backend.onrender.com/client/send-otp', {
         email: formData.email,
         name: formData.firstName,
       });
@@ -492,130 +527,41 @@ const SignupForm = () => {
       setOtpExpiry(expiryTime);
   
       // Start resend timer
-      setResendTimer(60); // Reset the timer to 60 seconds
-  
-      // Show OTP input modal
-      Swal.fire({
-        title: 'Email Verification',
-        html: `
-          <p>We've sent a verification code to ${formData.email}</p>
-          <p>Enter the 6-digit code below:</p>
-          <div id="otp-container" style="display: flex; justify-content: center; gap: 10px; margin: 10px 0;">
-            <input id="swal-otp-0" style="width: 40px; height: 40px; text-align: center; font-size: 18px; border: 1px solid #ddd; border-radius: 4px;" maxlength="1" />
-            <input id="swal-otp-1" style="width: 40px; height: 40px; text-align: center; font-size: 18px; border: 1px solid #ddd; border-radius: 4px;" maxlength="1" />
-            <input id="swal-otp-2" style="width: 40px; height: 40px; text-align: center; font-size: 18px; border: 1px solid #ddd; border-radius: 4px;" maxlength="1" />
-            <input id="swal-otp-3" style="width: 40px; height: 40px; text-align: center; font-size: 18px; border: 1px solid #ddd; border-radius: 4px;" maxlength="1" />
-            <input id="swal-otp-4" style="width: 40px; height: 40px; text-align: center; font-size: 18px; border: 1px solid #ddd; border-radius: 4px;" maxlength="1" />
-            <input id="swal-otp-5" style="width: 40px; height: 40px; text-align: center; font-size: 18px; border: 1px solid #ddd; border-radius: 4px;" maxlength="1" />
-          </div>
-          <p>Code expires in 15 minutes</p>
-          <button id="resend-otp" disabled class="swal2-confirm swal2-styled" style="background-color: gray; margin-top: 10px;">
-            Resend Code (60s)
-          </button>
-        `,
-        showCancelButton: true,
-        confirmButtonText: 'Verify',
-        confirmButtonColor: '#002657',
-        cancelButtonText: 'Cancel',
-        allowOutsideClick: false,
-        didOpen: () => {
-          // Handle OTP input behavior
-          const inputs = Array.from({ length: 6 }, (_, i) => document.getElementById(`swal-otp-${i}`));
-  
-          inputs.forEach((input, index) => {
-            input.addEventListener('input', (e) => {
-              if (e.target.value && index < 5) {
-                inputs[index + 1].focus();
-              }
-            });
-  
-            input.addEventListener('keydown', (e) => {
-              if (e.key === 'Backspace' && !e.target.value && index > 0) {
-                inputs[index - 1].focus();
-              }
-            });
-          });
-  
-          // Handle resend button
-          const resendButton = document.getElementById('resend-otp');
-          const updateResendButton = () => {
-            if (resendTimer > 0) {
-              resendButton.disabled = true;
-              resendButton.textContent = `Resend Code (${resendTimer}s)`;
-            } else {
-              resendButton.disabled = false;
-              resendButton.textContent = 'Resend Code';
-              resendButton.style.backgroundColor = '#E5B305';
-            }
-          };
-  
-          const interval = setInterval(() => {
-            setResendTimer((prev) => {
-              if (prev <= 1) {
-                clearInterval(interval);
-                return 0;
-              }
-              return prev - 1;
-            });
-          }, 1000);
-  
-          updateResendButton();
-  
-          resendButton.addEventListener('click', async () => {
-            if (resendTimer === 0) {
-              try {
-                await axios.post('https://newportal-backend.onrender.com/client/send-otp', {
-                  email: formData.email,
-                  name: formData.firstName,
-                });
-  
-                // Reset OTP expiry time
-                const expiryTime = new Date();
-                expiryTime.setMinutes(expiryTime.getMinutes() + 15);
-                setOtpExpiry(expiryTime);
-  
-                // Reset resend timer
-                setResendTimer(60);
-                resendButton.disabled = true;
-                resendButton.style.backgroundColor = 'gray';
-  
-                toast.success('New OTP code sent!');
-              } catch (error) {
-                toast.error('Failed to resend OTP');
-              }
-            }
-          });
-  
-          // Focus on first input
-          inputs[0].focus();
-        },
-        preConfirm: () => {
-          const enteredOtp = Array.from({ length: 6 }, (_, i) =>
-            document.getElementById(`swal-otp-${i}`).value
-          ).join('');
-  
-          return { otp: enteredOtp };
-        },
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          try {
-            // Verify OTP
-            await axios.post('https://newportal-backend.onrender.com/client/verify-otp', {
-              email: formData.email,
-              otp: result.value.otp,
-            });
-  
-            // OTP verified, proceed with registration
-            handleFinalSubmit();
-          } catch (error) {
-            toast.error('Invalid or expired OTP. Please try again.');
-            sendOtp(); // Reopen OTP dialog
-          }
-        }
-      });
+      setResendTimer(60);
+      
+      // Show OTP screen
+      setShowOtpScreen(true);
+      toast.success('Verification code sent to your email');
+      
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Failed to send verification code';
       toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyOtp = async () => {
+    const enteredOtp = otp.join('');
+    if (enteredOtp.length !== 6) {
+      toast.error('Please enter the complete 6-digit code');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Verify OTP
+      await axios.post('https://newportal-backend.onrender.com/client/verify-otp', {
+        email: formData.email,
+        otp: enteredOtp,
+      });
+
+      // Move to WhatsApp screen
+      setShowOtpScreen(false);
+      setShowWhatsappScreen(true);
+
+    } catch (error) {
+      toast.error('Invalid or expired OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -625,8 +571,6 @@ const SignupForm = () => {
     setLoading(true);
   
     try {
-      const selectedProperty = properties.find(p => p._id === formData.propertyId);
-  
       if (!selectedProperty) {
         toast.error('Selected property not found');
         return;
@@ -649,76 +593,9 @@ const SignupForm = () => {
         passportPhoto: passportPhotoResponse.data.secure_url,
         propertyName: selectedProperty.propertyName,
         propertyActualPrice: selectedProperty.amount,
-        phone: fullPhoneNumber, // Use the concatenated phone number
+        phone: fullPhoneNumber,
       };
   
-      console.log(userData);
-  
-      // Show form download prompt
-      const { subscriptionForm } = selectedProperty;
-      
-     // Inside the handleFinalSubmit function, modify the Swal.fire section:
-
-Swal.fire({
-  title: 'Download Subscription Form',
-  html: `
-    <p> Send your payment screenshot to our WhatsApp before moving to the dashboard</p> 
-    <div style="margin: 20px 0;">
-      <a href="https://wa.me/+2348071260398?text=Hello,%20I%20have%20completed%20my%20property%20registration%20for%20${selectedProperty.propertyName}" target="_blank" id="whatsapp-link" class="swal2-confirm swal2-styled" style="background-color: #25D366; text-decoration: none; display: inline-block; padding: 10px 20px;">
-        WhatsApp Us
-      </a>
-    </div>
-    <p style="color: #FF0000; font-weight: bold;">Important: Your property sale will not be approved until you send the completed form!</p>
-    <p style="color: #FF0000; font-weight: bold;">Important: You have to submit the required documents to the WhatsApp number before the "I Have Sent The Files" button can work!</p>
-    <p id="timer-message" style="margin-top: 15px; color: #FF0000; display: none;">Session timeout warning: Please complete this step soon or you may need to restart the process.</p>
-  `,
-  showCancelButton: false,
-  confirmButtonText: 'I Have Sent The Files',
-  confirmButtonColor: '#002657',
-  allowOutsideClick: false,
-  didOpen: () => {
-    // Track if links were clicked
-    let formDownloaded = false;
-    let whatsappClicked = false;
-    
-    document.getElementById('whatsapp-link').addEventListener('click', () => {
-      whatsappClicked = true;
-    });
-    
-    // Disable the confirm button until WhatsApp is clicked
-    const confirmButton = Swal.getConfirmButton();
-    confirmButton.disabled = true;
-    
-    const checkBothClicked = setInterval(() => {
-      if (whatsappClicked) {
-        confirmButton.disabled = false;
-        clearInterval(checkBothClicked);
-      }
-    }, 1000);
-    
-    // Add timeout warnings
-    const timerMessage = document.getElementById('timer-message');
-    
-    // After 60 seconds, show the warning
-    setTimeout(() => {
-      if (!whatsappClicked) {
-        timerMessage.style.display = 'block';
-      }
-    }, 60000); // 1 minute
-    
-    // After 5 minutes, change button color to draw attention
-    setTimeout(() => {
-      if (!whatsappClicked) {
-        confirmButton.style.backgroundColor = '#E5B305';
-        confirmButton.disabled = false; // Enable the button anyway
-        confirmButton.textContent = 'Continue Without Sending Files (Not Recommended)';
-        Swal.getFooter().innerHTML = '<p style="color: #FF0000; font-weight: bold;">Warning: Continuing without sending files may delay your property approval!</p>';
-      }
-    }, 300000); // 5 minutes
-  }
-}).then(async (result) => {
-  if (result.isConfirmed) {
-    try {
       // Send data to the backend
       const response = await axios.post('https://newportal-backend.onrender.com/client/signup', userData);
 
@@ -742,17 +619,6 @@ Swal.fire({
   
       navigate('/client-dashboard');
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'There was an error processing your registration. Please try again.';
-      Swal.fire({
-        title: 'Registration Error',
-        text: errorMessage,
-        icon: 'error',
-        confirmButtonColor: '#002657',
-      });
-    }
-  }
-});
-    } catch (error) {
       const errorMessage =
         error.response?.data?.message || error.message || 'Registration failed. Please try again.';
       toast.error(errorMessage);
@@ -764,7 +630,7 @@ Swal.fire({
   
   const handleSubmit = (e) => {
     e.preventDefault();
-    sendOtp(); // Start the OTP verification process
+    sendOtp(); 
   };
 
   // Progress indicator
@@ -785,6 +651,15 @@ Swal.fire({
           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${currentStep >= 3 ? 'bg-[#002657] text-white' : 'bg-gray-200'}`}>3</div>
           <span className="text-sm mt-1">Property</span>
         </div>
+        {(showOtpScreen || showWhatsappScreen) && (
+          <>
+            <div className={`flex-1 h-0.5 self-center bg-[#002657]`}></div>
+            <div className={`flex flex-col items-center`}>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center bg-[#002657] text-white`}>4</div>
+              <span className="text-sm mt-1">Verification</span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -801,260 +676,184 @@ Swal.fire({
 
         <ProgressBar />
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Card 1: Personal Information */}
-          {currentStep === 1 && (
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-bold mb-6">Personal Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="flex items-center text-sm font-medium mb-2">
-                    <User className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                    First Name*
-                  </label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-                    required
-                  />
-                </div>
+        {/* OTP Verification Screen */}
+        {showOtpScreen && (
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-xl font-bold mb-6 text-center">Email Verification</h3>
+            <div className="text-center mb-6">
+              <p className="mb-2">We've sent a verification code to <span className="font-semibold">{formData.email}</span></p>
+              <p>Enter the 6-digit code below:</p>
+            </div>
+            
+            <div className="flex justify-center gap-2 mb-6">
+              {[0, 1, 2, 3, 4, 5].map((index) => (
+                <input
+                  key={index}
+                  ref={el => otpRefs.current[index] = el}
+                  id={`otp-${index}`}
+                  type="text"
+                  value={otp[index]}
+                  onChange={(e) => handleOtpChange(e, index)}
+                  onKeyDown={(e) => handleOtpKeyDown(e, index)}
+                  onPaste={index === 0 ? handleOtpPaste : undefined}
+                  className="w-12 h-14 text-center text-xl font-semibold border-2 border-gray-300 rounded-md focus:border-[#002657] focus:ring-1 focus:ring-[#E5B305]"
+                  maxLength={1}
+                />
+              ))}
+            </div>
+            
+            <div className="text-center mb-6">
+              <p>Code expires in 15 minutes</p>
+              <button
+                type="button"
+                onClick={sendOtp}
+                disabled={resendTimer > 0}
+                className={`mt-2 text-sm font-semibold ${resendTimer > 0 ? 'text-gray-400' : 'text-[#E5B305] cursor-pointer'}`}
+              >
+                {resendTimer > 0 ? `Resend Code (${resendTimer}s)` : 'Resend Code'}
+              </button>
+            </div>
+            
+            <div className="flex justify-between mt-6">
+              <button
+                type="button"
+                onClick={handleBack}
+                className="py-2 px-4 flex items-center rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: '#E5B305' }}
+              >
+                <ChevronLeft className="mr-2 w-5 h-5" />
+                Back
+              </button>
+              <button
+                type="button"
+                onClick={verifyOtp}
+                disabled={loading || otp.join('').length !== 6}
+                className="py-2 px-4 rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: '#002657' }}
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                    </svg>
+                    Verifying...
+                  </span>
+                ) : (
+                  'Verify Code'
+                )}
+              </button>
+            </div>
+          </div>
+        )}
 
-                <div>
-                  <label className="flex items-center text-sm font-medium mb-2">
-                    <User className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                    Last Name*
-                  </label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-                    required
-                  />
-                </div>
+        {/* WhatsApp Screen */}
+        {showWhatsappScreen && selectedProperty && (
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-xl font-bold mb-6 text-center">Complete Verification</h3>
+            
+            <div className="text-center mb-6">
+              <p className="mb-4">Send your payment screenshot to our WhatsApp before proceeding to the dashboard</p>
+              
+              <div className="mb-6 p-4 border rounded-lg bg-gray-50">
+                <p className="font-semibold mb-2">Property Selected: {selectedProperty.propertyName}</p>
+                <p className="mb-2">Amount: ₦{selectedProperty.amount}</p>
+                <p className="mb-2">Payment Method: {formData.paymentMethod === 'full' ? 'Full Payment' : 'Installment'}</p>
+                <p>Amount Paid: ₦{formData.amount}</p>
+              </div>
+              
+              <div className="flex justify-center mb-6">
+                <a 
+                  href={`https://wa.me/+2348071260398?text=Hello,%20I%20have%20completed%20my%20property%20registration%20for%20${selectedProperty.propertyName}%20and%20I'm%20sending%20my%20payment%20proof.`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center px-6 py-3 rounded-md bg-[#25D366] text-white font-semibold hover:bg-opacity-90 transition-opacity"
+                >
+                  <svg 
+                    className="w-5 h-5 mr-2" 
+                    fill="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                  </svg>
+                  WhatsApp Us
+                </a>
+              </div>
+              
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <p className="text-yellow-800 font-semibold mb-2">Important Notes:</p>
+                <ul className="text-yellow-700 text-sm list-disc list-inside">
+                  <li className="mb-1">Your property sale will not be approved until you send the payment proof</li>
+                  <li>Please send the payment screenshot to complete your registration</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="flex justify-between mt-6">
+              <button
+                type="button"
+                onClick={handleBack}
+                className="py-2 px-4 flex items-center rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: '#E5B305' }}
+              >
+                <ChevronLeft className="mr-2 w-5 h-5" />
+                Back
+              </button>
+              <button
+                type="button"
+                onClick={handleFinalSubmit}
+                disabled={loading}
+                className="py-2 px-4 rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: '#002657' }}
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                    </svg>
+                    Processing...
+                  </span>
+                ) : (
+                  'Complete Registration'
+                )}
+              </button>
+            </div>
+          </div>
+        )}
 
-                <div>
-                  <label className="flex items-center text-sm font-medium mb-2">
-                    <User className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-                  />
-                </div>
-
-                <div>
-                  <label className="flex items-center text-sm font-medium mb-2">
-                    <Mail className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                    Email*
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="flex items-center text-sm font-medium mb-2">
-                    <Phone className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                    Phone*
-                  </label>
-                  <div className="flex">
-                    <select
-                      name="countryCode"
-                      value={formData.countryCode}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-2/4 rounded-l-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-                      required
-                    >
-                      {countryCodes.map((country) => (
-                        <option key={country.code} value={country.code}>
-                          {country.code} ({country.name})
-                        </option>
-                      ))}
-                    </select>
+        {/* Main registration form */}
+        {!showOtpScreen && !showWhatsappScreen && (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Card 1: Personal Information */}
+            {currentStep === 1 && (
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <h3 className="text-xl font-bold mb-6">Personal Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="flex items-center text-sm font-medium mb-2">
+                      <User className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      First Name*
+                    </label>
                     <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
+                      type="text"
+                      name="firstName"
+                      value={formData.firstName}
                       onChange={handleInputChange}
-                      className="mt-1 block w-3/4 rounded-r-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
                       required
                     />
                   </div>
-                </div>
-
-                <div>
-                  <label className="flex items-center text-sm font-medium mb-2">
-                    <Calendar className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                    Date of Birth*
-                  </label>
-                  <input
-                    type="date"
-                    name="dateOfBirth"
-                    value={formData.dateOfBirth}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="flex items-center text-sm font-medium mb-2">
-                    <User className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                    Gender*
-                  </label>
-                  <select
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-                    required
-                  >
-                    <option value="">Select Gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="flex items-center text-sm font-medium mb-2">
-                    <MapPin className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                    Address*
-                  </label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="flex items-center text-sm font-medium mb-2">
-                    <MapPin className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                    City*
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="flex items-center text-sm font-medium mb-2">
-                    <MapPin className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                    State*
-                  </label>
-                  <input
-                    type="text"
-                    name="state"
-                    value={formData.state}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="flex items-center text-sm font-medium mb-2">
-                    <MapPin className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                    Country*
-                  </label>
-                  <input
-                    type="text"
-                    name="country"
-                    value={formData.country}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="flex items-center text-sm font-medium mb-2">
-                    <MapPin className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                    ZipCode
-                  </label>
-                  <input
-                    type="text"
-                    name="zipCode"
-                    value={formData.zipCode}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="flex items-center text-sm font-medium mb-2">
-                    <Image className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                    Passport Photo*
-                  </label>
-                  <input
-                    type="file"
-                    name="passportPhoto"
-                    onChange={handleFileChange}
-                    accept="image/*"
-                    className="mt-1 block w-full text-sm text-gray-500
-                      file:mr-4 file:py-2 file:px-4
-                      file:rounded-full file:border-0
-                      file:text-sm file:font-semibold
-                      file:bg-[#002657] file:text-white
-                      hover:file:bg-[#E5B305]"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="flex justify-end mt-6">
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className="py-2 px-4 flex items-center rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: '#002657' }}
-                >
-                  Next
-                  <ChevronRight className="ml-2 w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Card 2: Details */}
-          {currentStep === 2 && (
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Next of Kin Details */}
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold">Next of Kin Details</h3>
 
                   <div>
                     <label className="flex items-center text-sm font-medium mb-2">
                       <User className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                      Full Name*
+                      Last Name*
                     </label>
                     <input
                       type="text"
-                      name="nextOfKinName"
-                      value={formData.nextOfKinName}
+                      name="lastName"
+                      value={formData.lastName}
                       onChange={handleInputChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
                       required
@@ -1063,16 +862,15 @@ Swal.fire({
 
                   <div>
                     <label className="flex items-center text-sm font-medium mb-2">
-                      <Heart className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                      Relationship*
+                      <User className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      Username
                     </label>
                     <input
                       type="text"
-                      name="nextOfKinRelationship"
-                      value={formData.nextOfKinRelationship}
+                      name="username"
+                      value={formData.username}
                       onChange={handleInputChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-                      required
                     />
                   </div>
 
@@ -1083,8 +881,8 @@ Swal.fire({
                     </label>
                     <input
                       type="email"
-                      name="nextOfKinEmail"
-                      value={formData.nextOfKinEmail}
+                      name="email"
+                      value={formData.email}
                       onChange={handleInputChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
                       required
@@ -1096,30 +894,73 @@ Swal.fire({
                       <Phone className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
                       Phone*
                     </label>
+                    <div className="flex">
+                      <select
+                        name="countryCode"
+                        value={formData.countryCode}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-2/4 rounded-l-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                        required
+                      >
+                        {countryCodes.map((country) => (
+                          <option key={country.code} value={country.code}>
+                            {country.code} ({country.name})
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-3/4 rounded-r-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="flex items-center text-sm font-medium mb-2">
+                      <Calendar className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      Date of Birth*
+                    </label>
                     <input
-                      type="tel"
-                      name="nextOfKinPhone"
-                      value={formData.nextOfKinPhone}
+                      type="date"
+                      name="dateOfBirth"
+                      value={formData.dateOfBirth}
                       onChange={handleInputChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
                       required
                     />
                   </div>
-                </div>
-
-                {/* Work & Referral Details */}
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold">Work & Referral Details</h3>
 
                   <div>
                     <label className="flex items-center text-sm font-medium mb-2">
-                      <Briefcase className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                      Occupation*
+                      <User className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      Gender*
+                    </label>
+                    <select
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleInputChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                      required
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="flex items-center text-sm font-medium mb-2">
+                      <MapPin className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      Address*
                     </label>
                     <input
                       type="text"
-                      name="occupation"
-                      value={formData.occupation}
+                      name="address"
+                      value={formData.address}
                       onChange={handleInputChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
                       required
@@ -1129,12 +970,12 @@ Swal.fire({
                   <div>
                     <label className="flex items-center text-sm font-medium mb-2">
                       <MapPin className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                      Office Address*
+                      City*
                     </label>
                     <input
                       type="text"
-                      name="officeAddress"
-                      value={formData.officeAddress}
+                      name="city"
+                      value={formData.city}
                       onChange={handleInputChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
                       required
@@ -1143,207 +984,388 @@ Swal.fire({
 
                   <div>
                     <label className="flex items-center text-sm font-medium mb-2">
-                      <Gift className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                      Referral Code
+                      <MapPin className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      State*
                     </label>
                     <input
                       type="text"
-                      name="referralCode"
-                      value={formData.referralCode}
+                      name="state"
+                      value={formData.state}
                       onChange={handleInputChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                      required
                     />
-                    {referrerDetails && (
-                      <p className="text-sm text-gray-600 mt-1">Referred by: {referrerDetails.firstName} {referrerDetails.lastName}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-between mt-6">
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="py-2 px-4 flex items-center rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: '#E5B305' }}
-                >
-                  <ChevronLeft className="mr-2 w-5 h-5" />
-                  Back
-                </button>
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className="py-2 px-4 flex items-center rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: '#002657' }}
-                >
-                  Next
-                  <ChevronRight className="ml-2 w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Card 3: Account & Property Payment */}
-          {currentStep === 3 && (
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Property Purchase */}
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold">Property Purchase</h3>
-
-                  <div>
-                    <label className="flex items-center text-sm font-medium mb-2">
-                      <Building2 className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                      Select Property*
-                    </label>
-                    <select
-                      name="propertyId"
-                      value={formData.propertyId}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-                      required
-                    >
-                      <option value="">Select a property</option>
-                      {properties.map(property => (
-                        <option key={property._id} value={property._id}>
-                          {property.propertyName} - ₦{property.amount}
-                        </option>
-                      ))}
-                    </select>
                   </div>
 
                   <div>
                     <label className="flex items-center text-sm font-medium mb-2">
-                      <CreditCard className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                      Payment Method*
-                    </label>
-                    <select
-                      name="paymentMethod"
-                      value={formData.paymentMethod}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-                      required
-                    >
-                      <option value="">Select payment method</option>
-                      <option value="full">Full Payment</option>
-                      <option value="installment">Installment</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="flex items-center text-sm font-medium mb-2">
-                      <HandCoins className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                      Amount*
+                      <MapPin className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      Country*
                     </label>
                     <input
                       type="text"
-                      name="amount"
-                      value={formData.amount}
+                      name="country"
+                      value={formData.country}
                       onChange={handleInputChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
                       required
                     />
                   </div>
 
-                  <div className="flex items-center mt-4">
+                  <div>
+                    <label className="flex items-center text-sm font-medium mb-2">
+                      <MapPin className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      ZipCode
+                    </label>
                     <input
-                      type="checkbox"
-                      name="termsAccepted"
-                      checked={formData.termsAccepted}
+                      type="text"
+                      name="zipCode"
+                      value={formData.zipCode}
                       onChange={handleInputChange}
-                      className="h-4 w-4 text-[#002657] focus:ring-[#E5B305] border-gray-300 rounded"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="flex items-center text-sm font-medium mb-2">
+                      <Image className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                      Passport Photo*
+                    </label>
+                    <input
+                      type="file"
+                      name="passportPhoto"
+                      onChange={handleFileChange}
+                      accept="image/*"
+                      className="mt-1 block w-full text-sm text-gray-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-full file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-[#002657] file:text-white
+                        hover:file:bg-[#E5B305]"
                       required
                     />
-                    <label className="ml-2 block text-sm text-gray-900">
-                      I accept the terms and conditions*
-                    </label>
                   </div>
                 </div>
-
-                {/* Password Section */}
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold">Create Password</h3>
-
-                  <div className="relative">
-                    <label className="flex items-center text-sm font-medium mb-2">
-                      <Lock className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                      Password*
-                    </label>
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      name="password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={togglePasswordVisibility}
-                      className="absolute inset-y-0 right-0 pr-3 pt-8 flex items-center"
-                    >
-                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                  </div>
-
-                  <div className="relative">
-                    <label className="flex items-center text-sm font-medium mb-2">
-                      <Lock className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
-                      Confirm Password*
-                    </label>
-                    <input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={toggleConfirmPasswordVisibility}
-                      className="absolute inset-y-0 right-0 pr-3 pt-8 flex items-center"
-                    >
-                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                  </div>
-                </div>
-
                 
+                <div className="flex justify-end mt-6">
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    className="py-2 px-4 flex items-center rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: '#002657' }}
+                  >
+                    Next
+                    <ChevronRight className="ml-2 w-5 h-5" />
+                  </button>
+                </div>
               </div>
+            )}
 
-              <div className="flex justify-between mt-6">
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="py-2 px-4 flex items-center rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: '#E5B305' }}
-                >
-                  <ChevronLeft className="mr-2 w-5 h-5" />
-                  Back
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="py-2 px-4 rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: '#002657' }}
-                >
-                  {loading ? (
-                    <span className="flex items-center justify-center">
-                      <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                      </svg>
-                      Processing...
-                    </span>
-                  ) : (
-                    'Sign Up & Purchase Property'
-                  )}
-                </button>
+            {/* Card 2: Details */}
+            {currentStep === 2 && (
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Next of Kin Details */}
+                  <div className="space-y-6">
+                    <h3 className="text-xl font-bold">Next of Kin Details</h3>
+
+                    <div>
+                      <label className="flex items-center text-sm font-medium mb-2">
+                        <User className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                        Full Name*
+                      </label>
+                      <input
+                        type="text"
+                        name="nextOfKinName"
+                        value={formData.nextOfKinName}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="flex items-center text-sm font-medium mb-2">
+                        <Heart className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                        Relationship*
+                      </label>
+                      <input
+                        type="text"
+                        name="nextOfKinRelationship"
+                        value={formData.nextOfKinRelationship}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="flex items-center text-sm font-medium mb-2">
+                        <Mail className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                        Email*
+                      </label>
+                      <input
+                        type="email"
+                        name="nextOfKinEmail"
+                        value={formData.nextOfKinEmail}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="flex items-center text-sm font-medium mb-2">
+                        <Phone className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                        Phone*
+                      </label>
+                      <input
+                        type="tel"
+                        name="nextOfKinPhone"
+                        value={formData.nextOfKinPhone}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Work & Referral Details */}
+                  <div className="space-y-6">
+                    <h3 className="text-xl font-bold">Work & Referral Details</h3>
+
+                    <div>
+                      <label className="flex items-center text-sm font-medium mb-2">
+                        <Briefcase className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                        Occupation*
+                      </label>
+                      <input
+                        type="text"
+                        name="occupation"
+                        value={formData.occupation}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="flex items-center text-sm font-medium mb-2">
+                        <MapPin className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                        Office Address*
+                      </label>
+                      <input
+                        type="text"
+                        name="officeAddress"
+                        value={formData.officeAddress}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="flex items-center text-sm font-medium mb-2">
+                        <Gift className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                        Referral Code
+                      </label>
+                      <input
+                        type="text"
+                        name="referralCode"
+                        value={formData.referralCode}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                      />
+                      {referrerDetails && (
+                        <p className="text-sm text-gray-600 mt-1">Referred by: {referrerDetails.firstName} {referrerDetails.lastName}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between mt-6">
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    className="py-2 px-4 flex items-center rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: '#E5B305' }}
+                  >
+                    <ChevronLeft className="mr-2 w-5 h-5" />
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    className="py-2 px-4 flex items-center rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: '#002657' }}
+                  >
+                    Next
+                    <ChevronRight className="ml-2 w-5 h-5" />
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
-        </form>
+            )}
+
+            {/* Card 3: Account & Property Payment */}
+            {currentStep === 3 && (
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Property Purchase */}
+                  <div className="space-y-6">
+                    <h3 className="text-xl font-bold">Property Purchase</h3>
+
+                    <div>
+                      <label className="flex items-center text-sm font-medium mb-2">
+                        <Building2 className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                        Select Property*
+                      </label>
+                      <select
+                        name="propertyId"
+                        value={formData.propertyId}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                        required
+                      >
+                        <option value="">Select a property</option>
+                        {properties.map(property => (
+                          <option key={property._id} value={property._id}>
+                            {property.propertyName} - ₦{property.amount}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="flex items-center text-sm font-medium mb-2">
+                        <CreditCard className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                        Payment Method*
+                      </label>
+                      <select
+                        name="paymentMethod"
+                        value={formData.paymentMethod}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                        required
+                      >
+                        <option value="">Select payment method</option>
+                        <option value="full">Full Payment</option>
+                        <option value="installment">Installment</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="flex items-center text-sm font-medium mb-2">
+                        <HandCoins className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                        Amount*
+                      </label>
+                      <input
+                        type="text"
+                        name="amount"
+                        value={formData.amount}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                        required
+                      />
+                    </div>
+
+                    <div className="flex items-center mt-4">
+                      <input
+                        type="checkbox"
+                        name="termsAccepted"
+                        checked={formData.termsAccepted}
+                        onChange={handleInputChange}
+                        className="h-4 w-4 text-[#002657] focus:ring-[#E5B305] border-gray-300 rounded"
+                        required
+                      />
+                      <label className="ml-2 block text-sm text-gray-900">
+                        I accept the terms and conditions*
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Password Section */}
+                  <div className="space-y-6">
+                    <h3 className="text-xl font-bold">Create Password</h3>
+
+                    <div className="relative">
+                      <label className="flex items-center text-sm font-medium mb-2">
+                        <Lock className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                        Password*
+                      </label>
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={togglePasswordVisibility}
+                        className="absolute inset-y-0 right-0 pr-3 pt-8 flex items-center"
+                      >
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
+
+                    <div className="relative">
+                      <label className="flex items-center text-sm font-medium mb-2">
+                        <Lock className="w-5 h-5 mr-2" style={{ color: '#E5B305' }} />
+                        Confirm Password*
+                      </label>
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-2 focus:ring-[#E5B305] focus:border-[#002657] p-2"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={toggleConfirmPasswordVisibility}
+                        className="absolute inset-y-0 right-0 pr-3 pt-8 flex items-center"
+                      >
+                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between mt-6">
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    className="py-2 px-4 flex items-center rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: '#E5B305' }}
+                  >
+                    <ChevronLeft className="mr-2 w-5 h-5" />
+                    Back
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="py-2 px-4 rounded-md shadow-sm text-white font-medium hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: '#002657' }}
+                  >
+                    {loading ? (
+                      <span className="flex items-center justify-center">
+                        <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                        </svg>
+                        Processing...
+                      </span>
+                    ) : (
+                      'Continue to Verification'
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+          </form>
+        )}
       </div>
       <ToastContainer position="top-right" />
     </div>
