@@ -181,27 +181,24 @@ const Navbar = ({ toggleSidebar }) => {
     switch(notification.type) {
       case 'fund_approved':
       case 'fund_rejected':
-        window.location.href = '/realtor/dashboard/funds';
+        window.location.href = '/realtor-dashboard/fund-history';
         break;
       case 'withdrawal_approved':
       case 'withdrawal_rejected':
-        window.location.href = '/realtor/dashboard/withdrawals';
-        break;
-      case 'testimonial_approved':
-        window.location.href = '/realtor/dashboard/testimonials';
+        window.location.href = '/realtor-dashboard/transactions';
         break;
       case 'new_property':
-        window.location.href = '/realtor/properties';
+        window.location.href = '/realtor-dashboard/properties';
         break;
       case 'support_reply':
-        window.location.href = `/realtor/support/tickets/${notification.ticketId}`;
+        window.location.href = `/realtor-dashboard/support`;
         break;
       case 'direct_commission':
       case 'indirect_commission':
-        window.location.href = `/realtor/commissions/${notification.purchaseId}`;
+        window.location.href = `/realtor-dashboard/commission`;
         break;
       default:
-        window.location.href = '/realtor/dashboard';
+        window.location.href = '/realtor-dashboard';
     }
     
     setShowNotifications(false);

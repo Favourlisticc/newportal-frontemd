@@ -19,12 +19,21 @@ const logActivity = async (userId, userModel, activityType, description, metadat
   }
 };
 
+const currencies = [
+  { code: "NGN", name: "Nigerian Naira", symbol: "₦" },
+  { code: "USD", name: "US Dollar", symbol: "$" },
+  { code: "EUR", name: "Euro", symbol: "€" },
+  { code: "GBP", name: "British Pound", symbol: "£" },
+  { code: "CAD", name: "Canadian Dollar", symbol: "CA$" }
+];
+
 const FundNowPage = () => {
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(null);
   const [paymentDate, setPaymentDate] = useState("");
   const [amount, setAmount] = useState("");
   const [errors, setErrors] = useState({});
+  const [selectedCurrency, setSelectedCurrency] = useState(currencies[0]); // Default to NGN
 
   const validateForm = () => {
     const newErrors = {};
@@ -68,6 +77,8 @@ const FundNowPage = () => {
         email: parsedData.email,
         phone: parsedData.phone,
         amount,
+        currency: selectedCurrency.code, // Add currency code
+        currencySymbol: selectedCurrency.symbol, // Add currency symbol
         paymentDate,
         proofImage: cloudinaryResponse.data.secure_url
       });
@@ -138,19 +149,36 @@ const FundNowPage = () => {
           </div>
 
           <div>
-            <label className="block text-gray-700 mb-2 text-left">Amount To Fund ₦</label>
-            <div className="flex items-center">
-          
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-300"
-                placeholder="Enter amount"
-              />
-            </div>
-            {errors.amount && <p className="text-red-500 text-sm">{errors.amount}</p>}
+          <label className="block text-gray-700 mb-2 text-left">Amount</label>
+          <div className="flex items-center">
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-300"
+              placeholder="Enter amount"
+            />
           </div>
+          {errors.amount && <p className="text-red-500 text-sm">{errors.amount}</p>}
+        </div>
+
+        <div>
+          <label className="block text-gray-700 mb-2 text-left">Currency</label>
+          <select
+            value={selectedCurrency.code}
+            onChange={(e) => {
+              const currency = currencies.find(c => c.code === e.target.value);
+              setSelectedCurrency(currency || currencies[0]);
+            }}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-300"
+          >
+            {currencies.map((currency) => (
+              <option key={currency.code} value={currency.code}>
+                {currency.name} ({currency.symbol})
+              </option>
+            ))}
+          </select>
+        </div>
 
           <button
             type="submit"

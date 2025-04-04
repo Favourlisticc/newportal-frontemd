@@ -109,13 +109,7 @@ const Home = () => {
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
       </div>
 
-      {/* Reminders Section */}
-      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h2 className="text-xl font-semibold mb-4">Payment Reminders</h2>
-        <div className="overflow-x-auto">
-          <RemindersTable />
-        </div>
-      </div>
+
 
       {/* Testimonials Section */}
       <div className="bg-white p-3 md:p-6 rounded-lg shadow-md mb-6 md:mb-8 relative">
@@ -186,6 +180,8 @@ const Home = () => {
           </div>
         </div>
 
+        
+
         <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
           <div className="flex items-center">
             <div className="bg-green-100 p-4 rounded-lg mr-4">
@@ -202,6 +198,18 @@ const Home = () => {
           </div>
         </div>
       </div>
+
+            {/* Referral Info Section */}
+            {referralInfo && (
+        <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 mb-8 mt-40">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">You were referred by:</h3>
+          <div className="space-y-2">
+            <p className="text-gray-900 text-lg">{referralInfo.name}</p>
+            <p className="text-gray-600 text-md">{referralInfo.phone}</p>
+            <p className="text-gray-600 text-md">{referralInfo.email}</p>
+          </div>
+        </div>
+      )}
 
       {/* Approved Transactions Section */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden mt-8">
@@ -247,17 +255,15 @@ const Home = () => {
         )}
       </div>
 
-      {/* Referral Info Section */}
-      {referralInfo && (
-        <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 mb-8 mt-40">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">You were referred by:</h3>
-          <div className="space-y-2">
-            <p className="text-gray-900 text-lg">{referralInfo.name}</p>
-            <p className="text-gray-600 text-md">{referralInfo.phone}</p>
-            <p className="text-gray-600 text-md">{referralInfo.email}</p>
-          </div>
+            {/* Reminders Section */}
+      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+        <h2 className="text-xl font-semibold mb-4">Payment Reminders</h2>
+        <div className="overflow-x-auto">
+          <RemindersTable />
         </div>
-      )}
+      </div>
+
+
 
       <ToastContainer
         position="top-right"
