@@ -37,6 +37,11 @@ const RegisterForm = () => {
   const navigate = useNavigate();
   const timerRef = useRef(null);
 
+  const primaryColor = "#002657";
+const primaryHoverColor = "#001a3d";
+const primaryLightColor = "#334d7a";
+const primaryContrastText = "#ffffff";
+
 
    useEffect(() => {
         document.title = "Baay Realty - Realtor Registration";
@@ -421,17 +426,29 @@ const RegisterForm = () => {
         p: 4,
         boxShadow: 3,
         borderRadius: 2,
-        backgroundColor: "background.paper",
-        background: "linear-gradient(145deg, #f5f7fa, #c3cfe2)",
+        background: "white",
       }}
     >
       <div className='flex justify-center items-center'>
         <img src={logo} className='w-32 h-32' alt="Baay Realty Logo" />
       </div>
-      <Typography variant="h4" gutterBottom align="center" sx={{ color: "#3f51b5", fontWeight: "bold" }}>
+      <Typography 
+        variant="h4" 
+        gutterBottom 
+        align="center" 
+        sx={{ 
+          color: primaryColor, 
+          fontWeight: "bold" 
+        }}
+      >
         Welcome to Our Platform!
       </Typography>
-      <Typography variant="body1" gutterBottom align="center" sx={{ mb: 4, color: "#666" }}>
+      <Typography 
+        variant="body1" 
+        gutterBottom 
+        align="center" 
+        sx={{ mb: 4, color: "#666" }}
+      >
         Please fill out the form below to create your realtor account.
       </Typography>
 
@@ -450,18 +467,18 @@ const RegisterForm = () => {
             '& .MuiOutlinedInput-root': {
               borderRadius: '8px',
               '&:hover fieldset': {
-                borderColor: '#3f51b5',
+                borderColor: primaryColor,
               },
               '&.Mui-focused fieldset': {
-                borderColor: '#3f51b5',
-                boxShadow: '0 0 0 2px rgba(63, 81, 181, 0.2)',
+                borderColor: primaryColor,
+                boxShadow: `0 0 0 2px ${primaryLightColor}`,
               },
             },
           }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Person sx={{ color: "#3f51b5" }} />
+                <Person sx={{ color: primaryColor }} />
               </InputAdornment>
             ),
           }}
@@ -481,23 +498,23 @@ const RegisterForm = () => {
             '& .MuiOutlinedInput-root': {
               borderRadius: '8px',
               '&:hover fieldset': {
-                borderColor: '#3f51b5',
+                borderColor: primaryColor,
               },
               '&.Mui-focused fieldset': {
-                borderColor: '#3f51b5',
-                boxShadow: '0 0 0 2px rgba(63, 81, 181, 0.2)',
+                borderColor: primaryColor,
+                boxShadow: `0 0 0 2px ${primaryLightColor}`,
               },
             },
           }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <People sx={{ color: "#3f51b5" }} />
+                <People sx={{ color: primaryColor }} />
               </InputAdornment>
             ),
-            readOnly: !!referralId, // Make field read-only if referral ID exists
+            readOnly: !!referralId,
           }}
-          disabled={!!referralId} // Disable editing if referral ID exists
+          disabled={!!referralId}
         />
 
         {/* First Name */}
@@ -514,18 +531,18 @@ const RegisterForm = () => {
             '& .MuiOutlinedInput-root': {
               borderRadius: '8px',
               '&:hover fieldset': {
-                borderColor: '#3f51b5',
+                borderColor: primaryColor,
               },
               '&.Mui-focused fieldset': {
-                borderColor: '#3f51b5',
-                boxShadow: '0 0 0 2px rgba(63, 81, 181, 0.2)',
+                borderColor: primaryColor,
+                boxShadow: `0 0 0 2px ${primaryLightColor}`,
               },
             },
           }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <AccountCircle sx={{ color: "#3f51b5" }} />
+                <AccountCircle sx={{ color: primaryColor }} />
               </InputAdornment>
             ),
           }}
@@ -545,18 +562,18 @@ const RegisterForm = () => {
             '& .MuiOutlinedInput-root': {
               borderRadius: '8px',
               '&:hover fieldset': {
-                borderColor: '#3f51b5',
+                borderColor: primaryColor,
               },
               '&.Mui-focused fieldset': {
-                borderColor: '#3f51b5',
-                boxShadow: '0 0 0 2px rgba(63, 81, 181, 0.2)',
+                borderColor: primaryColor,
+                boxShadow: `0 0 0 2px ${primaryLightColor}`,
               },
             },
           }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <AccountCircle sx={{ color: "#3f51b5" }} />
+                <AccountCircle sx={{ color: primaryColor }} />
               </InputAdornment>
             ),
           }}
@@ -576,18 +593,18 @@ const RegisterForm = () => {
             '& .MuiOutlinedInput-root': {
               borderRadius: '8px',
               '&:hover fieldset': {
-                borderColor: '#3f51b5',
+                borderColor: primaryColor,
               },
               '&.Mui-focused fieldset': {
-                borderColor: '#3f51b5',
-                boxShadow: '0 0 0 2px rgba(63, 81, 181, 0.2)',
+                borderColor: primaryColor,
+                boxShadow: `0 0 0 2px ${primaryLightColor}`,
               },
             },
           }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Phone sx={{ color: "#3f51b5" }} />
+                <Phone sx={{ color: primaryColor }} />
               </InputAdornment>
             ),
           }}
@@ -607,18 +624,18 @@ const RegisterForm = () => {
             '& .MuiOutlinedInput-root': {
               borderRadius: '8px',
               '&:hover fieldset': {
-                borderColor: '#3f51b5',
+                borderColor: primaryColor,
               },
               '&.Mui-focused fieldset': {
-                borderColor: '#3f51b5',
-                boxShadow: '0 0 0 2px rgba(63, 81, 181, 0.2)',
+                borderColor: primaryColor,
+                boxShadow: `0 0 0 2px ${primaryLightColor}`,
               },
             },
           }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Email sx={{ color: "#3f51b5" }} />
+                <Email sx={{ color: primaryColor }} />
               </InputAdornment>
             ),
           }}
@@ -640,18 +657,18 @@ const RegisterForm = () => {
             '& .MuiOutlinedInput-root': {
               borderRadius: '8px',
               '&:hover fieldset': {
-                borderColor: '#3f51b5',
+                borderColor: primaryColor,
               },
               '&.Mui-focused fieldset': {
-                borderColor: '#3f51b5',
-                boxShadow: '0 0 0 2px rgba(63, 81, 181, 0.2)',
+                borderColor: primaryColor,
+                boxShadow: `0 0 0 2px ${primaryLightColor}`,
               },
             },
           }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Cake sx={{ color: "#3f51b5" }} />
+                <Cake sx={{ color: primaryColor }} />
               </InputAdornment>
             ),
           }}
@@ -672,18 +689,18 @@ const RegisterForm = () => {
             '& .MuiOutlinedInput-root': {
               borderRadius: '8px',
               '&:hover fieldset': {
-                borderColor: '#3f51b5',
+                borderColor: primaryColor,
               },
               '&.Mui-focused fieldset': {
-                borderColor: '#3f51b5',
-                boxShadow: '0 0 0 2px rgba(63, 81, 181, 0.2)',
+                borderColor: primaryColor,
+                boxShadow: `0 0 0 2px ${primaryLightColor}`,
               },
             },
           }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <People sx={{ color: "#3f51b5" }} />
+                <People sx={{ color: primaryColor }} />
               </InputAdornment>
             ),
           }}
@@ -708,24 +725,27 @@ const RegisterForm = () => {
             '& .MuiOutlinedInput-root': {
               borderRadius: '8px',
               '&:hover fieldset': {
-                borderColor: '#3f51b5',
+                borderColor: primaryColor,
               },
               '&.Mui-focused fieldset': {
-                borderColor: '#3f51b5',
-                boxShadow: '0 0 0 2px rgba(63, 81, 181, 0.2)',
+                borderColor: primaryColor,
+                boxShadow: `0 0 0 2px ${primaryLightColor}`,
               },
             },
           }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Lock sx={{ color: "#3f51b5" }} />
+                <Lock sx={{ color: primaryColor }} />
               </InputAdornment>
             ),
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton onClick={() => setShowPassword(!showPassword)}>
-                  {showPassword ? <VisibilityOff sx={{ color: "#3f51b5" }} /> : <Visibility sx={{ color: "#3f51b5" }} />}
+                  {showPassword ? 
+                    <VisibilityOff sx={{ color: primaryColor }} /> : 
+                    <Visibility sx={{ color: primaryColor }} />
+                  }
                 </IconButton>
               </InputAdornment>
             ),
@@ -736,12 +756,22 @@ const RegisterForm = () => {
         <Button
           type="submit"
           variant="contained"
-          color="primary"
           fullWidth
-          sx={{ mt: 2, borderRadius: '8px', fontWeight: 'bold', fontSize: '16px', py: 1.5 }}
+          sx={{ 
+            mt: 2, 
+            borderRadius: '8px', 
+            fontWeight: 'bold', 
+            fontSize: '16px', 
+            py: 1.5,
+            backgroundColor: primaryColor,
+            color: primaryContrastText,
+            '&:hover': {
+              backgroundColor: primaryHoverColor,
+            }
+          }}
           disabled={loading}
         >
-          {loading ? <CircularProgress size={24} /> : "Register"}
+          {loading ? <CircularProgress size={24} color="inherit" /> : "Register"}
         </Button>
       </form>
 

@@ -25,7 +25,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   ];
 
   return (
-    <div className={`w-64 bg-indigo-900 text-white fixed h-full flex flex-col transform transition-transform duration-300 z-[999] ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+    <div className={`w-64 bg-[#002657] text-white fixed h-full flex flex-col transform transition-transform duration-300 z-[999] ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
       <div className="flex justify-between items-center p-4 lg:hidden">
         <img src={logo} className="w-32 h-32" alt="Logo" />
         <button onClick={onClose} className="text-white hover:text-gray-400">

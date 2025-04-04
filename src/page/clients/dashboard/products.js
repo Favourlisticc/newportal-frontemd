@@ -231,11 +231,11 @@ const handleViewClick = (property) => {
           <input
             type="text"
             placeholder="Search by name, location, type..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#002657]"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <button type="submit" className="absolute right-2 top-2 bg-indigo-600 text-white p-1 rounded-md">
+          <button type="submit" className="absolute right-2 top-2 bg-[#002657] text-white p-1 rounded-md">
             <FiSearch className="w-4 h-4" />
           </button>
         </form>
@@ -269,7 +269,7 @@ const handleViewClick = (property) => {
 
                   <div className="p-6">
                     <h3 className="text-xl font-semibold mb-2">{property.propertyName}</h3>
-                    <p className="text-2xl font-bold text-indigo-600 mb-4">₦{property.amount.toLocaleString()}</p>
+                    <p className="text-2xl font-bold text-[#002657] mb-4">₦{property.amount.toLocaleString()}</p>
 
                     <div className="flex items-center text-gray-600 mb-4">
                       <FiMapPin className="w-5 h-5 mr-2" />
@@ -283,7 +283,7 @@ const handleViewClick = (property) => {
 
                     <div className="flex justify-between items-center">
                       <button
-                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                        className="bg-[#002657] text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
                         onClick={() => handleViewClick(property)}
                       >
                         View

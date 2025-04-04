@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ArrowRightOnRectangleIcon, Bars3Icon, BellIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import io from 'socket.io-client';
@@ -9,7 +9,39 @@ const Navbar = ({ toggleSidebar }) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const [socket, setSocket] = useState(null);
+
+  const notificationRef = useRef(null);
+  const profileRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Handle notification dropdown
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        const bellIcon = document.querySelector('.notification-bell-icon');
+        if (!bellIcon || !bellIcon.contains(event.target)) {
+          setShowNotifications(false);
+        }
+      }
+      
+      // Handle profile dropdown
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        const profileImage = document.querySelector('.profile-image');
+        if (!profileImage || !profileImage.contains(event.target)) {
+          setShowProfile(false);
+        }
+      }
+    };
+
+    if (showNotifications || showProfile) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showNotifications, showProfile]);
 
   useEffect(() => {
     const storedData = localStorage.getItem("realtorData");
@@ -36,7 +68,6 @@ const Navbar = ({ toggleSidebar }) => {
       }
     });
   
-    // Connection events with more logging
     newSocket.on('connect', () => {
       console.log('Socket connected with ID:', newSocket.id);
       console.log('Authenticating as realtor:', user._id);
@@ -62,7 +93,6 @@ const Navbar = ({ toggleSidebar }) => {
   
     newSocket.on('authentication_success', (data) => {
       console.log('Authentication successful:', data);
-      // The server should send the room information in the response
       console.log('Current socket rooms:', data.rooms || []);
     });
   
@@ -95,7 +125,6 @@ const Navbar = ({ toggleSidebar }) => {
 
   useEffect(() => {
     if (userData) {
-      // Check for birthday
       const today = new Date();
       const userDob = new Date(userData.dob);
       if (today.getMonth() === userDob.getMonth() && today.getDate() === userDob.getDate()) {
@@ -116,7 +145,6 @@ const Navbar = ({ toggleSidebar }) => {
     try {
       const user = JSON.parse(localStorage.getItem("realtorData"));
     
-      // Log activity
       await axios.post('https://newportal-backend.onrender.com/activity/log-activity', {
         userId: user._id,
         userModel: 'Realtor',
@@ -129,7 +157,6 @@ const Navbar = ({ toggleSidebar }) => {
         }
       });
   
-      // Disconnect socket if it exists
       if (socket) {
         socket.disconnect();
       }
@@ -146,13 +173,11 @@ const Navbar = ({ toggleSidebar }) => {
   };
 
   const handleNotificationClick = (notification) => {
-    // Mark notification as read
     setNotifications(prev => 
       prev.map(n => n.id === notification.id ? {...n, read: true} : n)
     );
     setUnreadCount(prev => Math.max(0, prev - 1));
     
-    // Handle different notification types
     switch(notification.type) {
       case 'fund_approved':
       case 'fund_rejected':
@@ -168,7 +193,7 @@ const Navbar = ({ toggleSidebar }) => {
       case 'new_property':
         window.location.href = '/realtor/properties';
         break;
-      case 'support_reply':  // Make sure this matches exactly what the server sends
+      case 'support_reply':
         window.location.href = `/realtor/support/tickets/${notification.ticketId}`;
         break;
       case 'direct_commission':
@@ -180,6 +205,13 @@ const Navbar = ({ toggleSidebar }) => {
     }
     
     setShowNotifications(false);
+  };
+
+  const toggleProfile = () => {
+    // Only show profile dropdown on mobile
+    if (window.innerWidth < 768) {
+      setShowProfile(!showProfile);
+    }
   };
 
   if (!userData) return null;
@@ -196,24 +228,26 @@ const Navbar = ({ toggleSidebar }) => {
         </button>
 
         {/* User Info Section */}
-        <div className="flex items-center space-x-4">
-          {userData.profileImage ? (
-            <img
-              src={userData.profileImage}
-              alt="Profile"
-              className="w-10 h-10 rounded-full border-2 border-[#002657]"
-            />
-          ) : (
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg"
-              style={{
-                background: `linear-gradient(135deg, #002657 50%, #E5B305 50%)`,
-                border: "2px solid #002657",
-              }}
-            >
-              {`${userData.firstName[0]}${userData.lastName[0]}`.toUpperCase()}
-            </div>
-          )}
+        <div className="flex items-center space-x-4 relative" ref={profileRef}>
+          <div onClick={toggleProfile} className="cursor-pointer">
+            {userData.profileImage ? (
+              <img
+                src={userData.profileImage}
+                alt="Profile"
+                className="w-10 h-10 rounded-full border-2 border-[#002657] profile-image"
+              />
+            ) : (
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg profile-image"
+                style={{
+                  background: `linear-gradient(135deg, #002657 50%, #E5B305 50%)`,
+                  border: "2px solid #002657",
+                }}
+              >
+                {`${userData.firstName[0]}${userData.lastName[0]}`.toUpperCase()}
+              </div>
+            )}
+          </div>
 
           <div className="hidden md:block">
             <p className="text-gray-800 font-semibold">
@@ -221,6 +255,28 @@ const Navbar = ({ toggleSidebar }) => {
             </p>
             <p className="text-gray-500 text-sm">@{userData.username}</p>
           </div>
+
+          {/* Mobile Profile Dropdown */}
+          {showProfile && (
+            <div className="md:hidden absolute top-12 right-0 w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200">
+              <div className="py-2 px-3 bg-[#002657] text-white font-semibold">
+                Profile
+              </div>
+              <div className="p-3 border-b border-gray-100">
+                <div className="font-medium text-gray-800">
+                  {userData.firstName} {userData.lastName}
+                </div>
+                <div className="text-sm text-gray-600">@{userData.username}</div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="w-full text-left p-3 hover:bg-gray-50 text-red-600 flex items-center space-x-2"
+              >
+                <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                <span>Logout</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Birthday Message */}
@@ -232,10 +288,10 @@ const Navbar = ({ toggleSidebar }) => {
         )}
 
         {/* Notification Bell */}
-        <div className="relative">
+        <div className="relative" ref={notificationRef}>
           <button 
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="text-[#002657] hover:text-[#E5B305] transition-colors relative"
+            onClick={() => setShowNotifications(!showNotifications)} 
+            className="text-[#002657] hover:text-[#E5B305] transition-colors relative notification-bell-icon"
           >
             <BellIcon className="h-6 w-6" />
             {unreadCount > 0 && (
@@ -290,13 +346,13 @@ const Navbar = ({ toggleSidebar }) => {
           )}
         </div>
         
-        {/* Logout Button */}
+        {/* Desktop Logout Button */}
         <button
           onClick={handleLogout}
-          className="flex items-center space-x-2 text-[#002657] hover:text-[#E5B305] transition-colors"
+          className="hidden md:flex items-center space-x-2 text-[#002657] hover:text-[#E5B305] transition-colors"
         >
           <ArrowRightOnRectangleIcon className="h-6 w-6" />
-          <span className="hidden md:inline font-medium">Logout</span>
+          <span className="font-medium">Logout</span>
         </button>
       </div>
     </nav>

@@ -1,5 +1,5 @@
-import { FiLogOut, FiMenu, FiBell, FiX } from "react-icons/fi";
-import { useEffect, useState } from "react";
+import { FiLogOut, FiMenu, FiBell, FiX, FiChevronDown } from "react-icons/fi";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import axios from "axios";
 import io from 'socket.io-client';
@@ -11,8 +11,40 @@ const Navbar = ({ onToggleSidebar }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [birthdayMessage, setBirthdayMessage] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [socket, setSocket] = useState(null);
   const [socketInitialized, setSocketInitialized] = useState(false);
+
+  const notificationRef = useRef(null);
+  const profileDropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Handle notification dropdown
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        const bellIcon = document.querySelector('.notification-bell-icon');
+        if (!bellIcon || !bellIcon.contains(event.target)) {
+          setShowNotifications(false);
+        }
+      }
+      
+      // Handle profile dropdown
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+        const profileImage = document.querySelector('.profile-image-trigger');
+        if (!profileImage || !profileImage.contains(event.target)) {
+          setShowProfileDropdown(false);
+        }
+      }
+    };
+
+    if (showNotifications || showProfileDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showNotifications, showProfileDropdown]);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("Clientuser");
@@ -107,23 +139,14 @@ const Navbar = ({ onToggleSidebar }) => {
     });
 
     setSocket(newSocket);
-
-    return () => {
-      console.log('Cleaning up socket');
-      newSocket.disconnect();
-    };
   };
 
   useEffect(() => {
     if (user) {
-      // Check for birthday
       const today = new Date();
       const userDob = new Date(user.dateOfBirth);
       
-      if (
-        today.getMonth() === userDob.getMonth() &&
-        today.getDate() === userDob.getDate()
-      ) {
+      if (today.getMonth() === userDob.getMonth() && today.getDate() === userDob.getDate()) {
         fetchBirthdayMessage();
       }
     }
@@ -142,30 +165,28 @@ const Navbar = ({ onToggleSidebar }) => {
     }
   };
 
-// Update the notification click handler
-const handleNotificationClick = (notification) => {
-  // Mark as read locally
-  setNotifications(prev =>
-    prev.map(n =>
-      n.id === notification.id ? { ...n, read: true } : n
-    )
-  );
-  setUnreadCount(prev => Math.max(0, prev - 1));
-  
-  // Navigate based on notification type
-  switch(notification.type) {
-    case 'purchase_confirmed':
-      navigate(`/client/purchases/${notification.purchaseId}`);
-      break;
-    case 'support_reply':
-      navigate(`/client/support-tickets/${notification.ticketId}`);
-      break;
-    default:
-      navigate('/client/dashboard');
-  }
-  
-  setShowNotifications(false);
-};
+  const handleNotificationClick = (notification) => {
+    setNotifications(prev =>
+      prev.map(n =>
+        n.id === notification.id ? { ...n, read: true } : n
+      )
+    );
+    setUnreadCount(prev => Math.max(0, prev - 1));
+    
+    switch(notification.type) {
+      case 'purchase_confirmed':
+        navigate(`/client/purchases/${notification.purchaseId}`);
+        break;
+      case 'support_reply':
+        navigate(`/client/support-tickets/${notification.ticketId}`);
+        break;
+      default:
+        navigate('/client/dashboard');
+    }
+    
+    setShowNotifications(false);
+  };
+
   const markAllAsRead = () => {
     setNotifications(prev =>
       prev.map(notification => ({ ...notification, read: true }))
@@ -177,7 +198,6 @@ const handleNotificationClick = (notification) => {
     try {
       const user = JSON.parse(localStorage.getItem("Clientuser"));
       
-      // Log activity
       await axios.post('https://newportal-backend.onrender.com/activity/log-activity', {
         userId: user._id,
         userModel: 'client',
@@ -189,7 +209,6 @@ const handleNotificationClick = (notification) => {
         }
       });
   
-      // Disconnect socket if exists
       if (socket) {
         socket.disconnect();
       }
@@ -246,10 +265,10 @@ const handleNotificationClick = (notification) => {
         {/* Right section */}
         <div className="flex items-center space-x-4">
           {/* Notifications */}
-          <div className="relative">
+          <div className="relative" ref={notificationRef}>
             <button
               onClick={() => setShowNotifications(!showNotifications)}
-              className="text-white hover:text-[#E5B305] transition relative"
+              className="notification-bell-icon text-white hover:text-[#E5B305] transition relative"
               aria-label="Notifications"
             >
               <FiBell className="w-6 h-6" />
@@ -318,11 +337,34 @@ const handleNotificationClick = (notification) => {
             )}
           </div>
 
-          {/* User Info */}
-          {user && (
-            <div className="flex items-center space-x-3">
+          {/* Profile and Logout */}
+          <div className="relative" ref={profileDropdownRef}>
+            {/* Mobile Profile Dropdown Trigger */}
+            <div className="md:hidden flex items-center">
+              <button
+                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                className="profile-image-trigger flex items-center"
+              >
+                <img
+                  src={user?.passportPhoto || "https://via.placeholder.com/40"}
+                  alt="Profile"
+                  className="w-10 h-10 rounded-full border-2 border-[#E5B305] object-cover"
+                  onError={(e) => {
+                    e.target.src = "https://via.placeholder.com/40";
+                  }}
+                />
+                <FiChevronDown 
+                  className={`ml-1 text-white transition-transform duration-200 ${
+                    showProfileDropdown ? 'transform rotate-180' : ''
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Desktop View */}
+            <div className="hidden md:flex items-center space-x-3">
               <img
-                src={user.passportPhoto || "https://via.placeholder.com/40"}
+                src={user?.passportPhoto || "https://via.placeholder.com/40"}
                 alt="Profile"
                 className="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-[#E5B305] object-cover"
                 onError={(e) => {
@@ -330,20 +372,46 @@ const handleNotificationClick = (notification) => {
                 }}
               />
               <div className="hidden md:block">
-                <p className="text-white font-semibold">{user.firstName} {user.lastName}</p>
-                <p className="text-[#E5B305] text-sm">@{user.username}</p>
+                <p className="text-white font-semibold">{user?.firstName} {user?.lastName}</p>
+                <p className="text-[#E5B305] text-sm">@{user?.username}</p>
               </div>
             </div>
-          )}
 
-          {/* Logout Button */}
+            {/* Mobile Profile Dropdown */}
+            {showProfileDropdown && (
+              <div className="md:hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg overflow-hidden z-50">
+                <div className="p-4 border-b border-gray-200">
+                  <div className="flex items-center space-x-3">
+                    <img
+                      src={user?.passportPhoto || "https://via.placeholder.com/40"}
+                      alt="Profile"
+                      className="w-10 h-10 rounded-full border-2 border-[#E5B305] object-cover"
+                    />
+                    <div>
+                      <p className="font-semibold text-gray-800">{user?.firstName} {user?.lastName}</p>
+                      <p className="text-[#E5B305] text-sm">@{user?.username}</p>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center space-x-2 px-4 py-3 text-left text-gray-700 hover:bg-gray-100"
+                >
+                  <FiLogOut className="text-gray-600" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Desktop Logout Button */}
           <button
             onClick={handleLogout}
-            className="flex items-center space-x-2 text-white hover:text-[#E5B305] transition"
+            className="hidden md:flex items-center space-x-2 text-white hover:text-[#E5B305] transition"
             aria-label="Logout"
           >
             <FiLogOut className="w-6 h-6" />
-            <span className="hidden md:inline">Logout</span>
+            <span>Logout</span>
           </button>
         </div>
       </div>

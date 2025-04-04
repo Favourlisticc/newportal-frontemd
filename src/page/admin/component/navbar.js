@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import { FaBars, FaBell } from 'react-icons/fa';
 import axios from "axios";
@@ -9,11 +9,15 @@ const navigate = useNavigate();
 const [notifications, setNotifications] = useState([]);
 const [showNotifications, setShowNotifications] = useState(false);
 const [unreadCount, setUnreadCount] = useState(0);
-const notificationRef = useRef(null);
 const socketRef = useRef(null);
 
 // In your AdminNavbar component
 // In your AdminNavbar component
+
+const notificationRef = useRef(null);
+
+
+
 useEffect(() => {
   const SOCKET_URL = process.env.NODE_ENV === 'production' 
   ? 'https://newportal-backend.onrender.com'

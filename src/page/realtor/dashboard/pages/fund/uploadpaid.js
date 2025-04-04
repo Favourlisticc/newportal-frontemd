@@ -138,9 +138,9 @@ const FundNowPage = () => {
           </div>
 
           <div>
-            <label className="block text-gray-700 mb-2 text-left">Amount To Fund</label>
+            <label className="block text-gray-700 mb-2 text-left">Amount To Fund ₦</label>
             <div className="flex items-center">
-              <DollarSign className="text-gray-500 mr-2" />
+          
               <input
                 type="number"
                 value={amount}

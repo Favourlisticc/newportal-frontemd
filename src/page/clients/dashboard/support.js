@@ -25,11 +25,11 @@ const SupportPage = () => {
 
         {/* Email */}
         <a
-          href="mailto:clientrelations.baayprojects@gmail.com"
+          href="mailto:Clientrelations@baayprojects.com"
           className="flex items-center hover:text-blue-500 transition-colors duration-200"
         >
           <FaEnvelope className="text-blue-500 mr-2" />
-          <span>Email: clientrelations.baayprojects@gmail.com</span>
+          <span>Email: Clientrelations@baayprojects.com</span>
         </a>
 
         {/* Phone */}
