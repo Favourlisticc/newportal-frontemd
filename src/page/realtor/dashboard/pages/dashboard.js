@@ -333,9 +333,9 @@ const RealtorDashboard = () => {
       {/* Support Contact */}
       <div className="bg-white p-4 md:p-6 rounded-lg shadow-md mt-6 md:mt-20">
         <h2 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Support Contact Phone Number</h2>
-        <p className="text-gray-700 mb-4">08071260398</p>
+        <p className="text-gray-700 mb-4"> +2348113875325</p>
         <h2 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Email Address</h2>
-        <p className="text-gray-700 mb-4">clientrelations.baayprojects@gmail.com</p>
+        <p className="text-gray-700 mb-4">realtorrelarions@baayrealty.com</p>
       </div>
 
       <ToastContainer

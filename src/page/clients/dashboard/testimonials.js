@@ -44,7 +44,7 @@ const AddTestimonials = () => {
         realtorEmail: realtorData.email,
       };
   
-      const response = await fetch('http://localhost:3005/realtor/testimonials/submit', {
+      const response = await fetch('https://newportal-backend.onrender.com/realtor/testimonials/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ const AddTestimonials = () => {
           <label className="block text-sm font-medium mb-1">Testimonial Title</label>
           <input
             type="text"
-            {...register("title", { required: "Title is required" })}
+            {...register("propertypurchased", { required: "Title is required" })}
             className="w-full p-2 border rounded-lg"
           />
           {errors.title && <span className="text-red-500 text-sm">{errors.title.message}</span>}

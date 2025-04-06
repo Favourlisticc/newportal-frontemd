@@ -1,5 +1,4 @@
-// frontend/ContactSupport.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -11,7 +10,9 @@ import {
   faSpinner,
   faCaretDown,
   faCaretUp,
-  faPaperPlane
+  faPaperPlane,
+  faUserCircle,
+  faHeadset
 } from '@fortawesome/free-solid-svg-icons';
 
 const ContactSupport = () => {
@@ -22,14 +23,12 @@ const ContactSupport = () => {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
+  const messagesEndRef = useRef(null);
 
   // Fetch user data from localStorage
   const storedRealtorData = localStorage.getItem("Clientuser");
   const parsedData = JSON.parse(storedRealtorData);
   const userid = parsedData?._id;
-
-  console.log(parsedData)
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -44,6 +43,11 @@ const ContactSupport = () => {
     };
     fetchTickets();
   }, []);
+
+  // Scroll to bottom of messages when they update
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [selectedTicket, tickets]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -99,7 +103,7 @@ const ContactSupport = () => {
   };
 
   return (
-    <div className="container p-6 max-sm:p-0 max-w-4xl">
+    <div className="container p-6 max-sm:p-0 max-w-4xl mx-auto">
       <div className="bg-white shadow-xl rounded-lg p-6 mb-6 transition-all">
         <div 
           onClick={() => setIsOpen(!isOpen)}
@@ -200,41 +204,52 @@ const ContactSupport = () => {
               </div>
 
               {selectedTicket === ticket._id && (
-                <div className="pl-12 pr-4 pb-4 space-y-4">
-                  <div className="space-y-4">
+                <div className="pl-4 pr-4 pb-4">
+                  {/* Chat container */}
+                  <div className="bg-gray-50 rounded-lg p-4 h-96 overflow-y-auto">
                     {ticket.messages.map((msg, idx) => (
                       <div 
                         key={idx}
-                        className={`p-4 rounded-lg ${
-                          msg.sender === 'user' 
-                            ? 'bg-gray-50 ml-4' 
-                            : 'bg-teal-50 mr-4'
-                        }`}
+                        className={`flex mb-4 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="text-sm font-medium">
-                            {msg.sender === 'user' ? 'You' : 'Support Team'}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {format(new Date(msg.timestamp), 'MMM dd HH:mm')}
-                          </span>
+                        <div className={`flex max-w-xs md:max-w-md lg:max-w-lg ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}>
+                          <div className="flex-shrink-0 pt-1">
+                            <FontAwesomeIcon 
+                              icon={msg.sender === 'user' ? faUserCircle : faHeadset} 
+                              className={`text-2xl ${msg.sender === 'user' ? 'text-gray-400' : 'text-teal-500'}`}
+                            />
+                          </div>
+                          <div className={`mx-2 ${msg.sender === 'user' ? 'text-right' : 'text-left'}`}>
+                            <div 
+                              className={`inline-block px-4 py-2 rounded-lg ${msg.sender === 'user' 
+                                ? 'bg-teal-600 text-white rounded-tr-none' 
+                                : 'bg-white text-gray-800 shadow rounded-tl-none'}`}
+                            >
+                              <p>{msg.content}</p>
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {format(new Date(msg.timestamp), 'MMM dd HH:mm')}
+                            </div>
+                          </div>
                         </div>
-                        <p className="text-gray-700">{msg.content}</p>
                       </div>
                     ))}
+                    <div ref={messagesEndRef} />
                   </div>
 
-                  <div className="flex gap-2">
+                  {/* Reply input */}
+                  <div className="mt-4 flex gap-2">
                     <input
                       type="text"
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       placeholder="Type your reply..."
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      onKeyPress={(e) => e.key === 'Enter' && handleReply(ticket._id)}
                     />
                     <button
                       onClick={() => handleReply(ticket._id)}
-                      className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg transition-colors flex items-center gap-2"
+                      className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center gap-2"
                     >
                       <FontAwesomeIcon icon={faPaperPlane} />
                       Send

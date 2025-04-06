@@ -112,29 +112,26 @@ const toggleNotifications = () => {
     // Navigate based on notification type
     switch (notification.type) {
       case 'registration':
-        navigate('/admin/realtors');
+        navigate('/admin-dashboard/view-realtors');
         break;
       case 'withdrawal':
-        navigate('/admin/withdrawal-requests');
+        navigate('/admin-dashboard/withdrawal');
         break;
       case 'payment':
-        navigate('/admin/payments');
-        break;
-      case 'testimonial':
-        navigate('/admin/testimonials');
+        navigate('/admin-dashboard/funding');
         break;
       case 'purchase':
-        navigate('/admin/purchases');
+        navigate('/admin-dashboard/pending-sales');
         break;
         case 'support':
           case 'support_message':
-            navigate(`/admin/support-tickets/${notification.ticketId}`);
+            navigate(`/admin-dashboard/messages`);
             break;
         case 'registration':
-            navigate(`/admin/clients/${notification.userId}`);
+            navigate(`/admin-dashboard/view-client`);
             break;
       default:
-        navigate('/admin/dashboard');
+        navigate('/admin-dashboard');
 
     }
     setShowNotifications(false);

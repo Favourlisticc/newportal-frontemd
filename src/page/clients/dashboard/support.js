@@ -25,20 +25,20 @@ const SupportPage = () => {
 
         {/* Email */}
         <a
-          href="mailto:Clientrelations@baayprojects.com"
+          href="mailto:clientrelations@baayrealty.com"
           className="flex items-center hover:text-blue-500 transition-colors duration-200"
         >
           <FaEnvelope className="text-blue-500 mr-2" />
-          <span>Email: Clientrelations@baayprojects.com</span>
+          <span>Email:  clientrelations@baayrealty.com</span>
         </a>
 
         {/* Phone */}
         <a
-          href="tel:+2348071260398"
+          href="tel:+2348113875325"
           className="flex items-center hover:text-purple-500 transition-colors duration-200"
         >
           <FaPhone className="text-purple-500 mr-2" />
-          <span>Call: 08071260398</span>
+          <span>Call: +234 811 387 5325</span>
         </a>
 
         {/* LinkedIn */}

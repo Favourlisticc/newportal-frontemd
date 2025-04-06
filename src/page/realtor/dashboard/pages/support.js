@@ -14,31 +14,31 @@ const SupportPage = () => {
       <div className="space-y-4">
         {/* WhatsApp */}
         <a
-          href="https://wa.me/2348071260398"
+          href="https://wa.me/2348113875325"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center hover:text-green-500 transition-colors duration-200"
         >
           <FaWhatsapp className="text-green-500 mr-2" />
-          <span>WhatsApp: +2348071260398</span>
+          <span>WhatsApp:  +234 811 387 5325</span>
         </a>
 
         {/* Email */}
         <a
-          href="mailto:Clientrelations@baayprojects.com"
+          href=" realtorrelations@baayrealty.com"
           className="flex items-center hover:text-blue-500 transition-colors duration-200"
         >
           <FaEnvelope className="text-blue-500 mr-2" />
-          <span>Email: Clientrelations@baayprojects.com</span>
+          <span>Email:  realtorrelations@baayrealty.com</span>
         </a>
 
         {/* Phone */}
         <a
-          href="tel:+2348071260398"
+          href="tel:+234 811 387 5325"
           className="flex items-center hover:text-purple-500 transition-colors duration-200"
         >
           <FaPhone className="text-purple-500 mr-2" />
-          <span>Call: 08071260398</span>
+          <span>Call: +234 811 387 5325</span>
         </a>
 
         {/* LinkedIn */}
