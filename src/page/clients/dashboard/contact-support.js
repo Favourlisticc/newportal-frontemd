@@ -23,7 +23,22 @@ const ContactSupport = () => {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isReplying, setIsReplying] = useState(false);
   const messagesEndRef = useRef(null);
+
+  // Safe date formatter
+  const safeFormatDate = (dateString, formatStr) => {
+    try {
+      if (!dateString) return 'No date';
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Invalid date';
+      return format(date, formatStr);
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
+  };
 
   // Fetch user data from localStorage
   const storedRealtorData = localStorage.getItem("Clientuser");
@@ -42,7 +57,7 @@ const ContactSupport = () => {
       setIsLoading(false);
     };
     fetchTickets();
-  }, []);
+  }, [userid]);
 
   // Scroll to bottom of messages when they update
   useEffect(() => {
@@ -51,6 +66,7 @@ const ContactSupport = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const response = await axios.post(`https://newportal-backend.onrender.com/client/support`, {
         user: parsedData?._id,
@@ -68,21 +84,64 @@ const ContactSupport = () => {
       setMessage('');
     } catch (error) {
       console.error('Error creating ticket:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleReply = async (ticketId) => {
     if (!newMessage.trim()) return;
+    
+    // Create temporary message with pending state
+    const tempMessage = {
+      _id: `temp-${Date.now()}`,
+      sender: 'user',
+      content: newMessage,
+      timestamp: new Date().toISOString(),
+      isSending: true
+    };
+
+    // Optimistically update the UI
+    setTickets(tickets.map(t => 
+      t._id === ticketId ? { 
+        ...t, 
+        messages: [...(t.messages || []), tempMessage],
+        status: 'open'
+      } : t
+    ));
+    
+    setNewMessage('');
+    setIsReplying(true);
+
     try {
       const response = await axios.post(`https://newportal-backend.onrender.com/realtor/support/${ticketId}/messages`, {
+        sender: 'user',
         content: newMessage
       });
+
+      // Replace temporary message with server response
       setTickets(tickets.map(t => 
-        t._id === ticketId ? response.data : t
+        t._id === ticketId ? { 
+          ...t, 
+          messages: t.messages.map(m => 
+            m._id === tempMessage._id ? response.data : m
+          ),
+          status: 'open'
+        } : t
       ));
-      setNewMessage('');
     } catch (error) {
       console.error('Error sending reply:', error);
+      // Rollback on error
+      setTickets(tickets.map(t => 
+        t._id === ticketId ? { 
+          ...t, 
+          messages: t.messages.filter(m => m._id !== tempMessage._id)
+        } : t
+      ));
+      // Optionally restore the message to input field
+      setNewMessage(newMessage);
+    } finally {
+      setIsReplying(false);
     }
   };
 
@@ -150,9 +209,19 @@ const ContactSupport = () => {
             <button
               type="submit"
               className="w-full bg-teal-600 hover:bg-teal-700 text-white py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+              disabled={isSubmitting}
             >
-              <FontAwesomeIcon icon={faPaperPlane} />
-              Send Message
+              {isSubmitting ? (
+                <>
+                  <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <FontAwesomeIcon icon={faPaperPlane} />
+                  Send Message
+                </>
+              )}
             </button>
           </form>
         )}
@@ -193,7 +262,7 @@ const ContactSupport = () => {
                   <div>
                     <h3 className="font-semibold text-gray-800">{ticket.subject}</h3>
                     <p className="text-sm text-gray-500">
-                      {format(new Date(ticket.createdAt), 'MMM dd, yyyy HH:mm')}
+                      {safeFormatDate(ticket.createdAt, 'MMM dd, yyyy HH:mm')}
                     </p>
                   </div>
                 </div>
@@ -207,9 +276,30 @@ const ContactSupport = () => {
                 <div className="pl-4 pr-4 pb-4">
                   {/* Chat container */}
                   <div className="bg-gray-50 rounded-lg p-4 h-96 overflow-y-auto">
-                    {ticket.messages.map((msg, idx) => (
+                    {/* Initial ticket message */}
+                    <div className="flex justify-start mb-4">
+                      <div className="flex max-w-xs md:max-w-md lg:max-w-lg">
+                        <div className="flex-shrink-0 pt-1">
+                          <FontAwesomeIcon 
+                            icon={faUserCircle} 
+                            className="text-2xl text-gray-400"
+                          />
+                        </div>
+                        <div className="mx-2 text-left">
+                          <div className="inline-block px-4 py-2 bg-white text-gray-800 shadow rounded-lg rounded-tl-none">
+                            <p>{ticket.message}</p>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {safeFormatDate(ticket.createdAt, 'MMM dd HH:mm')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* All replies */}
+                    {ticket.messages?.map((msg, idx) => (
                       <div 
-                        key={idx}
+                        key={msg._id || idx}
                         className={`flex mb-4 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
                         <div className={`flex max-w-xs md:max-w-md lg:max-w-lg ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}>
@@ -223,12 +313,17 @@ const ContactSupport = () => {
                             <div 
                               className={`inline-block px-4 py-2 rounded-lg ${msg.sender === 'user' 
                                 ? 'bg-teal-600 text-white rounded-tr-none' 
-                                : 'bg-white text-gray-800 shadow rounded-tl-none'}`}
+                                : 'bg-white text-gray-800 shadow rounded-tl-none'} ${msg.isSending ? 'opacity-70' : ''}`}
                             >
                               <p>{msg.content}</p>
+                              {msg.isSending && (
+                                <div className="flex justify-end mt-1">
+                                  <FontAwesomeIcon icon={faSpinner} className="animate-spin text-xs" />
+                                </div>
+                              )}
                             </div>
                             <div className="text-xs text-gray-500 mt-1">
-                              {format(new Date(msg.timestamp), 'MMM dd HH:mm')}
+                              {msg.isSending ? 'Sending...' : safeFormatDate(msg.timestamp, 'MMM dd HH:mm')}
                             </div>
                           </div>
                         </div>
@@ -250,8 +345,13 @@ const ContactSupport = () => {
                     <button
                       onClick={() => handleReply(ticket._id)}
                       className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center gap-2"
+                      disabled={isReplying}
                     >
-                      <FontAwesomeIcon icon={faPaperPlane} />
+                      {isReplying ? (
+                        <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+                      ) : (
+                        <FontAwesomeIcon icon={faPaperPlane} />
+                      )}
                       Send
                     </button>
                   </div>

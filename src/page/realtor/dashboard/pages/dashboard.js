@@ -153,7 +153,7 @@ const RealtorDashboard = () => {
                   transition={{ duration: 0.5 }}
                   className="w-full p-4 border border-gray-200 rounded-lg"
                 >
-                  <h3 className="font-semibold">{testimonials[currentTestimonialIndex].title}</h3>
+                  <h3 className="font-semibold">{testimonials[currentTestimonialIndex].propertypurchased}</h3>
                   <p className="text-gray-700">{testimonials[currentTestimonialIndex].content}</p>
                   <p className="text-sm text-gray-500 mt-2">
                     {testimonials[currentTestimonialIndex].realtorName}

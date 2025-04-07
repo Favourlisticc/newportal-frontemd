@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
@@ -23,6 +24,8 @@ const ContactSupport = () => {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isReplying, setIsReplying] = useState(false);
   const messagesEndRef = useRef(null);
 
   // Fetch user data from localStorage
@@ -51,6 +54,7 @@ const ContactSupport = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const response = await axios.post(`https://newportal-backend.onrender.com/realtor/support`, {
         user: parsedData?._id,
@@ -66,24 +70,63 @@ const ContactSupport = () => {
       setIsOpen(false);
       setSubject('');
       setMessage('');
-      setSelectedTicket(response.data._id); // Auto-open the new ticket
+      setSelectedTicket(response.data._id);
     } catch (error) {
       console.error('Error creating ticket:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleReply = async (ticketId) => {
     if (!newMessage.trim()) return;
+    
+    // Create temporary message
+    const tempMessage = {
+      _id: `temp-${Date.now()}`,
+      content: newMessage,
+      sender: 'user',
+      timestamp: new Date().toISOString(),
+      isSending: true
+    };
+
+    // Optimistic update
+    setTickets(tickets.map(ticket => 
+      ticket._id === ticketId ? {
+        ...ticket,
+        messages: [...ticket.messages, tempMessage],
+        status: 'open'
+      } : ticket
+    ));
+    
+    setNewMessage('');
+    setIsReplying(true);
+
     try {
       const response = await axios.post(`https://newportal-backend.onrender.com/realtor/support/${ticketId}/messages`, {
         content: newMessage
       });
-      setTickets(tickets.map(t => 
-        t._id === ticketId ? response.data : t
+
+      // Replace temporary message with actual response
+      setTickets(tickets.map(ticket => 
+        ticket._id === ticketId ? {
+          ...ticket,
+          messages: ticket.messages.map(msg => 
+            msg._id === tempMessage._id ? response.data : msg
+          )
+        } : ticket
       ));
-      setNewMessage('');
     } catch (error) {
       console.error('Error sending reply:', error);
+      // Rollback on error
+      setTickets(tickets.map(ticket => 
+        ticket._id === ticketId ? {
+          ...ticket,
+          messages: ticket.messages.filter(msg => msg._id !== tempMessage._id)
+        } : ticket
+      ));
+    } finally {
+      setIsReplying(false);
     }
   };
 
@@ -103,9 +146,20 @@ const ContactSupport = () => {
     }
   };
 
+  const safeFormatDate = (dateString, formatStr) => {
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Invalid date';
+      return format(date, formatStr);
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
+  };
+
   return (
     <div className="container p-6 max-sm:p-4 max-w-4xl mx-auto">
-      <div className="bg-white shadow-xl rounded-lg p-6 mb-6 transition-all">
+         <div className="bg-white shadow-xl rounded-lg p-6 mb-6 transition-all">
         <div 
           onClick={() => setIsOpen(!isOpen)}
           className="flex justify-between items-center cursor-pointer hover:bg-gray-50 p-4 rounded-lg"
@@ -158,7 +212,6 @@ const ContactSupport = () => {
           </form>
         )}
       </div>
-
       <div className="bg-white shadow-xl rounded-lg p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
           <FontAwesomeIcon icon={faEnvelopeOpen} className="text-blue-500" />
@@ -206,11 +259,31 @@ const ContactSupport = () => {
 
               {selectedTicket === ticket._id && (
                 <div className="pl-4 pr-4 pb-4">
-                  {/* Chat container */}
                   <div className="bg-gray-50 rounded-lg p-4 h-80 overflow-y-auto mb-4">
-                    {ticket.messages.map((msg, idx) => (
+                    {/* Initial message */}
+                    <div className="flex justify-start mb-4">
+                      <div className="flex max-w-xs md:max-w-md lg:max-w-lg">
+                        <div className="flex-shrink-0 pt-1">
+                          <FontAwesomeIcon 
+                            icon={faUserCircle} 
+                            className="text-2xl text-gray-400"
+                          />
+                        </div>
+                        <div className="mx-2 text-left">
+                          <div className="inline-block px-4 py-2 bg-white text-gray-800 shadow rounded-tl-none rounded-lg">
+                            <p>{ticket.message}</p>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {safeFormatDate(ticket.createdAt, 'MMM dd HH:mm')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Messages */}
+                    {ticket.messages.map((msg) => (
                       <div 
-                        key={idx}
+                        key={msg._id}
                         className={`flex mb-4 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
                         <div className={`flex max-w-xs md:max-w-md lg:max-w-lg ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}>
@@ -222,14 +295,24 @@ const ContactSupport = () => {
                           </div>
                           <div className={`mx-2 ${msg.sender === 'user' ? 'text-right' : 'text-left'}`}>
                             <div 
-                              className={`inline-block px-4 py-2 rounded-lg ${msg.sender === 'user' 
-                                ? 'bg-teal-600 text-white rounded-tr-none' 
-                                : 'bg-white text-gray-800 shadow rounded-tl-none'}`}
+                              className={`inline-block px-4 py-2 rounded-lg ${
+                                msg.sender === 'user' 
+                                  ? 'bg-teal-600 text-white rounded-tr-none' 
+                                  : 'bg-white text-gray-800 shadow rounded-tl-none'
+                              } ${msg.isSending ? 'opacity-75' : ''}`}
                             >
                               <p>{msg.content}</p>
+                              {msg.isSending && (
+                                <div className="text-right mt-1">
+                                  <FontAwesomeIcon 
+                                    icon={faSpinner} 
+                                    className="animate-spin text-xs"
+                                  />
+                                </div>
+                              )}
                             </div>
                             <div className="text-xs text-gray-500 mt-1">
-                              {format(new Date(msg.timestamp), 'MMM dd HH:mm')}
+                              {msg.isSending ? 'Sending...' : safeFormatDate(msg.timestamp, 'MMM dd HH:mm')}
                             </div>
                           </div>
                         </div>
@@ -251,8 +334,13 @@ const ContactSupport = () => {
                     <button
                       onClick={() => handleReply(ticket._id)}
                       className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center gap-2"
+                      disabled={isReplying}
                     >
-                      <FontAwesomeIcon icon={faPaperPlane} />
+                      {isReplying ? (
+                        <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+                      ) : (
+                        <FontAwesomeIcon icon={faPaperPlane} />
+                      )}
                       <span className="hidden sm:inline">Send</span>
                     </button>
                   </div>

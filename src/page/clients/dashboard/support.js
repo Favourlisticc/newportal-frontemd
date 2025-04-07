@@ -34,11 +34,11 @@ const SupportPage = () => {
 
         {/* Phone */}
         <a
-          href="tel:+2348113875325"
+          href="tel:+2348071260398"
           className="flex items-center hover:text-purple-500 transition-colors duration-200"
         >
           <FaPhone className="text-purple-500 mr-2" />
-          <span>Call: +234 811 387 5325</span>
+          <span>Call: +2348071260398</span>
         </a>
 
         {/* LinkedIn */}
